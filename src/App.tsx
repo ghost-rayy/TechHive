@@ -135,9 +135,6 @@ function StoreFront() {
             >
               {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <Link to="/admin" className="hidden sm:flex p-3 bg-neutral-900 border border-neutral-800 rounded-xl hover:border-indigo-500/50 transition-all">
-              <Tag size={20} className="text-neutral-500 hover:text-indigo-400 transition-colors" />
-            </Link>
           </div>
         </div>
 
@@ -173,6 +170,7 @@ function StoreFront() {
               onUpdate={updateQuantity}
               total={cartTotal}
               onRequest={() => setIsRequesting(true)}
+              onStartShopping={() => setActiveTab('home')}
             />
           ) : (
             <section className="max-w-7xl mx-auto px-4 mt-12">
@@ -239,7 +237,7 @@ function StoreFront() {
 
       {/* Floating WhatsApp Button */}
       <a
-        href="https://wa.me/your-phone-number"
+        href="https://wa.me/233537212755"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-8 right-8 z-[100] bg-green-500 text-white p-4 rounded-full shadow-[0_0_30px_rgba(34,197,94,0.3)] hover:scale-110 active:scale-95 transition-all group"
@@ -406,12 +404,13 @@ function ProductCard({
 
 // Re-using interfaces from types.tsx
 
-function CartView({ items, onRemove, onUpdate, total, onRequest }: {
+function CartView({ items, onRemove, onUpdate, total, onRequest, onStartShopping }: {
   items: CartItem[];
   onRemove: (id: string) => void;
   onUpdate: (id: string, delta: number) => void;
   total: number;
   onRequest: () => void;
+  onStartShopping: () => void;
 }) {
   if (items.length === 0) {
     return (
@@ -421,7 +420,7 @@ function CartView({ items, onRemove, onUpdate, total, onRequest }: {
         </div>
         <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
         <p className="text-neutral-400 mb-8">Looks like you haven't added anything to your cart yet.</p>
-        <button className="bg-indigo-600 px-6 py-3 rounded-xl font-bold">Start Shopping</button>
+        <button onClick={onStartShopping} className="bg-indigo-600 px-6 py-3 rounded-xl font-bold">Start Shopping</button>
       </div>
     );
   }
