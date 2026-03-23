@@ -149,6 +149,60 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
   }
 });
 
+app.put('/api/products/:id', upload.single('image'), async (req, res) => {
+  const { id } = req.params;
+  const { name, category, price, description, specs, isNew, rating } = req.body;
+  
+  let image = req.body.image; 
+  if (req.file) {
+    try {
+      const b64 = Buffer.from(req.file.buffer).toString("base64");
+      let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+      const result = await cloudinary.uploader.upload(dataURI, {
+        resource_type: "auto",
+        folder: "techhive_products"
+      });
+      image = result.secure_url;
+    } catch (err) {
+      return res.status(500).json({ error: 'Cloudinary upload failed: ' + err.message });
+    }
+  }
+
+  let finalSpecs = specs;
+  if (typeof specs === 'string' && !specs.startsWith('[')) {
+    finalSpecs = JSON.stringify(specs.split(',').map(s => s.trim()).filter(s => s.length > 0));
+  } else if (!specs) {
+    // Keep existing specs if not provided, or set to empty array if needed.
+    // Usually we want to keep what's there if not in the payload.
+  }
+
+  try {
+    const isNewBool = isNew === 'true' || isNew === 'on';
+    const ratingNum = rating ? parseFloat(rating) : null;
+
+    let query = 'UPDATE products SET name = $1, category = $2, price = $3, description = $4, specs = $5, isNew = $6';
+    let params = [name, category, price, description, finalSpecs, isNewBool];
+
+    let paramIdx = 7;
+    if (image) {
+      query += `, image = $${paramIdx++}`;
+      params.push(image);
+    }
+    if (ratingNum !== null) {
+      query += `, rating = $${paramIdx++}`;
+      params.push(ratingNum);
+    }
+
+    query += ` WHERE id = $${paramIdx}`;
+    params.push(id);
+
+    await pool.query(query, params);
+    res.json({ message: 'Product updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.delete('/api/products/:id', async (req, res) => {
   const { id } = req.params;
   try {

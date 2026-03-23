@@ -933,6 +933,7 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
   const [formLoading, setFormLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = (file: File) => {
@@ -964,21 +965,44 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
     }
   };
 
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
+    setPreview(product.image);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingProduct(null);
+    setPreview(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormLoading(true);
     const formData = new FormData(e.currentTarget);
-    const isNew = formData.get('isNew') === 'on' ? 'true' : 'false';
-    formData.set('isNew', isNew);
+    
+    // Convert checkbox to string
+    const isNewCheckbox = formData.get('isNew') === 'on' ? 'true' : 'false';
+    formData.set('isNew', isNewCheckbox);
+
+    const url = editingProduct 
+      ? `${API_BASE_URL}/api/products/${editingProduct.id}`
+      : `${API_BASE_URL}/api/products`;
+    
+    const method = editingProduct ? 'PUT' : 'POST';
 
     try {
-      await fetch(`${API_BASE_URL}/api/products`, {
-        method: 'POST',
+      const response = await fetch(url, {
+        method,
         body: formData
       });
-      onSuccess();
-      (e.target as HTMLFormElement).reset();
-      setPreview(null);
+      
+      if (response.ok) {
+        onSuccess();
+        (e.target as HTMLFormElement).reset();
+        setPreview(null);
+        setEditingProduct(null);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -988,19 +1012,30 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 animate-in fade-in duration-500 lg:h-full lg:max-h-[85vh]">
-      {/* Add New Product - Left Column */}
+      {/* Product Form - Left Column */}
       <div className="lg:col-span-2 bg-neutral-900/40 border border-neutral-800/50 p-8 rounded-[2.5rem] flex flex-col overflow-hidden">
-        <h2 className="text-2xl font-bold mb-8">Add New Product</h2>
-        <form onSubmit={handleSubmit} className="space-y-6 overflow-y-auto pr-2 custom-scrollbar">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
+          {editingProduct && (
+            <button 
+              onClick={cancelEdit}
+              className="text-xs font-bold text-neutral-500 hover:text-white uppercase tracking-widest flex items-center gap-2 transition-all"
+            >
+              <X size={14} /> Cancel Edit
+            </button>
+          )}
+        </div>
+        
+        <form key={editingProduct?.id || 'new'} onSubmit={handleSubmit} className="space-y-6 overflow-y-auto pr-2 custom-scrollbar">
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Product Name</label>
-            <input required name="name" className="w-full bg-neutral-950/50 border border-neutral-800 rounded-2xl px-5 py-4 outline-none focus:border-indigo-500 transition-all" placeholder="e.g., MacBook Pro 16" />
+            <input required name="name" defaultValue={editingProduct?.name} className="w-full bg-neutral-950/50 border border-neutral-800 rounded-2xl px-5 py-4 outline-none focus:border-indigo-500 transition-all" placeholder="e.g., MacBook Pro 16" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Category</label>
-              <select name="category" className="w-full bg-neutral-950/50 border border-neutral-800 rounded-2xl px-5 py-4 outline-none focus:border-indigo-500 transition-all appearance-none cursor-pointer">
+              <select name="category" defaultValue={editingProduct?.category || 'gaming'} className="w-full bg-neutral-950/50 border border-neutral-800 rounded-2xl px-5 py-4 outline-none focus:border-indigo-500 transition-all appearance-none cursor-pointer">
                 <option value="gaming">Gaming</option>
                 <option value="casual">Professional</option>
                 <option value="budget">Cheap Deals</option>
@@ -1008,7 +1043,7 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Price (₵ )</label>
-              <input required name="price" type="number" className="w-full bg-neutral-950/50 border border-neutral-800 rounded-2xl px-5 py-4 outline-none focus:border-indigo-500 transition-all" placeholder="0" />
+              <input required name="price" type="number" defaultValue={editingProduct?.price} className="w-full bg-neutral-950/50 border border-neutral-800 rounded-2xl px-5 py-4 outline-none focus:border-indigo-500 transition-all" placeholder="0" />
             </div>
           </div>
 
@@ -1025,7 +1060,6 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
             >
               <input 
                 ref={fileInputRef}
-                required 
                 name="image" 
                 type="file" 
                 accept="image/*" 
@@ -1034,7 +1068,7 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
               />
               
               {preview ? (
-                <div className="absolute inset-0 group/preview flex items-center justify-center bg-neutral-900/50">
+                <div className="absolute inset-0 group/preview flex items-center justify-center bg-neutral-950">
                   <img src={preview} className="max-w-full max-h-full object-contain" alt="Preview" />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
                     <div className="text-center">
@@ -1048,9 +1082,7 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
                   <div className="w-12 h-12 bg-neutral-900 rounded-2xl flex items-center justify-center mx-auto mb-3 text-neutral-600 group-hover:text-indigo-400 transition-colors">
                     <PlusCircle size={24} />
                   </div>
-                  <p className="text-sm font-bold text-neutral-400 group-hover:text-neutral-300 leading-relaxed">
-                    Drag & drop product photo or <span className="text-indigo-500">browse</span>
-                  </p>
+                  <p className="text-sm font-bold text-neutral-400 group-hover:text-neutral-300">Drag & drop product photo or <span className="text-indigo-500">browse</span></p>
                   <p className="text-[10px] text-neutral-600 mt-2 uppercase tracking-widest font-bold">PNG, JPG recommended</p>
                 </div>
               )}
@@ -1059,29 +1091,26 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
 
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Full Description</label>
-            <textarea required name="description" rows={3} className="w-full bg-neutral-950/50 border border-neutral-800 rounded-2xl px-5 py-4 outline-none focus:border-indigo-500 transition-all resize-none" placeholder="Enter product details..." />
+            <textarea required name="description" defaultValue={editingProduct?.description} rows={3} className="w-full bg-neutral-950/50 border border-neutral-800 rounded-2xl px-5 py-4 outline-none focus:border-indigo-500 transition-all resize-none" placeholder="Enter product details..." />
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Specs (add one by one)</label>
-            <div className="flex gap-2">
-              <input name="specs" className="flex-1 bg-neutral-950/50 border border-neutral-800 rounded-2xl px-5 py-4 outline-none focus:border-indigo-500 transition-all" placeholder="e.g., Intel i7, 16GB RAM" />
-              <button type="button" className="bg-neutral-800 hover:bg-neutral-700 px-6 rounded-2xl font-bold transition-all text-neutral-300">Add</button>
-            </div>
+            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Specs (comma separated)</label>
+            <input name="specs" defaultValue={editingProduct?.specs?.join(', ')} className="w-full bg-neutral-950/50 border border-neutral-800 rounded-2xl px-5 py-4 outline-none focus:border-indigo-500 transition-all" placeholder="e.g., 16GB RAM, 512GB SSD, i7" />
           </div>
 
           <div className="grid grid-cols-2 gap-6 items-center">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Default Rating (Cleaniness of Device)</label>
-              <input name="rating" type="number" step="0.1" defaultValue={4.5} className="w-full bg-neutral-950/50 border border-neutral-800 rounded-2xl px-5 py-4 outline-none" />
+              <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Default Rating</label>
+              <input name="rating" type="number" step="0.1" defaultValue={editingProduct?.rating || 4.5} className="w-full bg-neutral-950/50 border border-neutral-800 rounded-2xl px-5 py-4 outline-none" />
             </div>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 pt-6 mb-4">
               <label className="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" className="w-5 h-5 accent-indigo-500 rounded-lg bg-neutral-950 border-neutral-800" defaultChecked />
+                <input name="inStock" type="checkbox" className="w-5 h-5 accent-indigo-500 rounded-lg bg-neutral-950 border-neutral-800" defaultChecked />
                 <span className="text-sm font-semibold text-neutral-400 group-hover:text-white transition-all">In Stock</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer group">
-                <input name="isNew" type="checkbox" className="w-5 h-5 accent-indigo-500 rounded-lg bg-neutral-950 border-neutral-800" />
+                <input name="isNew" type="checkbox" defaultChecked={editingProduct?.isNew} className="w-5 h-5 accent-indigo-500 rounded-lg bg-neutral-950 border-neutral-800" />
                 <span className="text-sm font-semibold text-neutral-400 group-hover:text-white transition-all">New Arrival</span>
               </label>
             </div>
@@ -1092,27 +1121,42 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
             disabled={formLoading}
             className="w-full py-5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-[1.5rem] font-bold transition-all flex items-center justify-center gap-3 shadow-xl shadow-indigo-600/20 active:scale-95"
           >
-            {formLoading ? <div className="w-6 h-6 border-3 border-white/20 border-t-white rounded-full animate-spin" /> : 'Add Product'}
+            {formLoading ? (
+              <div className="w-6 h-6 border-3 border-white/20 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>{editingProduct ? 'Update Product' : 'Add Product'} <Plus size={20} className={editingProduct ? 'hidden' : ''} /></>
+            )}
           </button>
         </form>
       </div>
 
-      {/* All Products List - Right Column */}
+      {/* Product List - Right Column */}
       <div className="lg:col-span-3 bg-neutral-900/40 border border-neutral-800/50 p-8 rounded-[2.5rem] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold">All Products ({products.length})</h2>
+          <h2 className="text-2xl font-bold">All Products <span className="text-neutral-500 text-lg ml-2">({products.length})</span></h2>
+          <div className="flex gap-2">
+            <button className="p-2.5 bg-neutral-950/50 border border-neutral-800 rounded-xl text-neutral-400 hover:text-white transition-all"><Sparkles size={18} /></button>
+          </div>
         </div>
 
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
           </div>
+        ) : products.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-10">
+            <div className="w-20 h-20 bg-neutral-950 rounded-full flex items-center justify-center mb-6 text-neutral-800">
+              <Package size={40} />
+            </div>
+            <h3 className="text-xl font-bold mb-2">No products yet</h3>
+            <p className="text-neutral-500 max-w-xs">Add your first tech product using the form on the left.</p>
+          </div>
         ) : (
-          <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar space-y-4">
-            {products.map(product => {
+          <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar">
+            {products.map((product) => {
               const absoluteImage = product.image.startsWith('http') ? product.image : `${API_BASE_URL}${product.image}`;
               return (
-                <div key={product.id} className="bg-black/40 border border-neutral-800/50 p-5 rounded-3xl group flex items-center justify-between hover:border-neutral-700 transition-all hover:bg-neutral-950/50">
+                <div key={product.id} className="group flex items-center justify-between p-4 bg-neutral-950/50 border border-neutral-800/50 rounded-3xl hover:border-indigo-500/30 transition-all">
                   <div className="flex items-center gap-6">
                     <div className="relative">
                       <img src={absoluteImage} className="w-20 h-20 object-cover rounded-2xl border border-neutral-800" alt="" />
@@ -1123,7 +1167,7 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
                       <div className="flex items-center gap-3">
                         <span className="text-indigo-400 font-bold">₵ {product.price}</span>
                         <span className="w-1 h-1 bg-neutral-800 rounded-full" />
-                        <span className="text-sm text-neutral-500 capitalize">{product.category}</span>
+                        <span className="text-sm text-neutral-500 capitalize">{product.category.replace('-', ' ')}</span>
                       </div>
                       <div className="flex gap-2 mt-3">
                         <span className="text-[8px] font-black px-2 py-0.5 bg-green-500/10 text-green-400 rounded uppercase tracking-widest">In Stock</span>
@@ -1133,7 +1177,10 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
                   </div>
 
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                    <button className="p-3 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-xl transition-all">
+                    <button 
+                      onClick={() => handleEdit(product)}
+                      className={`p-3 rounded-xl transition-all ${editingProduct?.id === product.id ? 'bg-indigo-600 text-white' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'}`}
+                    >
                       <Sparkles size={18} />
                     </button>
                     <button
