@@ -1005,7 +1005,7 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
               onDragLeave={onDragLeave}
               onDrop={onDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`relative group cursor-pointer h-40 border-2 border-dashed rounded-[2rem] transition-all flex flex-col items-center justify-center overflow-hidden ${
+              className={`relative group cursor-pointer h-64 border-2 border-dashed rounded-[2rem] transition-all flex flex-col items-center justify-center overflow-hidden ${
                 isDragging ? 'border-indigo-500 bg-indigo-500/5' : 'border-neutral-800 bg-neutral-950/50 hover:border-neutral-700'
               }`}
             >
@@ -1020,8 +1020,8 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
               />
               
               {preview ? (
-                <div className="absolute inset-0 group/preview">
-                  <img src={preview} className="w-full h-full object-cover" alt="Preview" />
+                <div className="absolute inset-0 group/preview flex items-center justify-center bg-neutral-900/50">
+                  <img src={preview} className="max-w-full max-h-full object-contain" alt="Preview" />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
                     <div className="text-center">
                       <PlusCircle size={32} className="mx-auto text-indigo-400 mb-2" />
@@ -1030,12 +1030,14 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
                   </div>
                 </div>
               ) : (
-                <div className="text-center">
+                <div className="text-center px-6">
                   <div className="w-12 h-12 bg-neutral-900 rounded-2xl flex items-center justify-center mx-auto mb-3 text-neutral-600 group-hover:text-indigo-400 transition-colors">
                     <PlusCircle size={24} />
                   </div>
-                  <p className="text-sm font-bold text-neutral-400 group-hover:text-neutral-300">Drag & drop or <span className="text-indigo-500">browse</span></p>
-                  <p className="text-[10px] text-neutral-600 mt-1 uppercase tracking-widest font-bold">PNG, JPG up to 10MB</p>
+                  <p className="text-sm font-bold text-neutral-400 group-hover:text-neutral-300 leading-relaxed">
+                    Drag & drop product photo or <span className="text-indigo-500">browse</span>
+                  </p>
+                  <p className="text-[10px] text-neutral-600 mt-2 uppercase tracking-widest font-bold">PNG, JPG recommended</p>
                 </div>
               )}
             </div>
