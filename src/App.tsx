@@ -195,7 +195,7 @@ function StoreFront() {
                   <div className="w-20 h-20 bg-neutral-900 rounded-3xl flex items-center justify-center mb-8 text-neutral-700 shadow-xl border border-neutral-800">
                     <Package size={36} />
                   </div>
-                  <h3 className="text-2xl font-black mb-3">No Gear Available Yet</h3>
+                  <h3 className="text-2xl font-black mb-3">No Laptops Available In This Section Yet</h3>
                   <p className="text-neutral-500 max-w-sm mx-auto leading-relaxed">
                     We're currently updating our inventory for the <span className="text-indigo-400 font-bold">{activeTab.replace('-', ' ')}</span> collection. 
                     Stay tuned for premium performance tech.
