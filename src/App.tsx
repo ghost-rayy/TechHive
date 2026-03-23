@@ -732,6 +732,9 @@ function AdminDashboard() {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
+      // Record visit
+      fetch(`${API_BASE_URL}/api/visit`, { method: 'POST' }).catch(() => {});
+      
       await Promise.all([fetchProducts(), fetchRequests(), fetchStats()]);
       setLoading(false);
     };
