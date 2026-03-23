@@ -8,7 +8,7 @@ import { Product, PurchaseRequest } from './types';
 import { useState, useMemo, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 
-type Tab = 'home' | 'gaming' | 'casual' | 'budget' | 'low-cost' | 'brand-new' | 'cart';
+type Tab = 'home' | 'gaming' | 'casual' | 'budget' | 'low-cost' | 'brand-new' | 'cheap-deals' | 'cart';
 
 interface CartItem extends Product {
   quantity: number;
@@ -81,6 +81,7 @@ function StoreFront() {
   const filteredProducts = useMemo(() => {
     if (activeTab === 'home' || activeTab === 'cart') return products;
     if (activeTab === 'brand-new') return products.filter(p => p.isNew);
+    if (activeTab === 'cheap-deals') return products.filter(p => p.category === 'budget' || p.category === 'low-cost' || p.price < 3000);
     if (activeTab === 'low-cost') return products.filter(p => p.category === 'low-cost');
     if (activeTab === 'budget') return products.filter(p => p.category === 'budget');
     if (activeTab === 'casual') return products.filter(p => p.category === 'casual');
@@ -110,10 +111,11 @@ function StoreFront() {
             </div>
 
             <nav className="hidden lg:flex items-center gap-1 bg-neutral-900/50 p-1.5 rounded-full border border-neutral-800/50">
-              <TabButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} label="Home" icon={<LayoutDashboard size={14} />} />
-              <TabButton active={activeTab === 'gaming'} onClick={() => setActiveTab('gaming')} label="Gaming" icon={<Gamepad2 size={14} />} />
-              <TabButton active={activeTab === 'casual'} onClick={() => setActiveTab('casual')} label="Professional" icon={<Briefcase size={14} />} />
-              <TabButton active={activeTab === 'brand-new'} onClick={() => setActiveTab('brand-new')} label="New Arrivals" icon={<Sparkles size={14} />} />
+              <TabButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} label="Home" icon={<LayoutDashboard size={18} />} />
+              <TabButton active={activeTab === 'gaming'} onClick={() => setActiveTab('gaming')} label="Gaming" icon={<Gamepad2 size={18} />} />
+              <TabButton active={activeTab === 'casual'} onClick={() => setActiveTab('casual')} label="Professional" icon={<Briefcase size={18} />} />
+              <TabButton active={activeTab === 'cheap-deals'} onClick={() => setActiveTab('cheap-deals')} label="Cheap Deals" icon={<Tag size={18} />} />
+              <TabButton active={activeTab === 'brand-new'} onClick={() => setActiveTab('brand-new')} label="New Arrivals" icon={<Sparkles size={18} />} />
             </nav>
           </div>
 
@@ -148,11 +150,12 @@ function StoreFront() {
               className="lg:hidden border-t border-neutral-800 bg-neutral-950 overflow-hidden"
             >
               <div className="p-4 grid grid-cols-2 gap-2">
-                <button onClick={() => { setActiveTab('home'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">Home</button>
-                <button onClick={() => { setActiveTab('gaming'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">Gaming</button>
-                <button onClick={() => { setActiveTab('casual'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">Professional</button>
-                <button onClick={() => { setActiveTab('brand-new'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">New Arrivals</button>
-              </div>
+                 <button onClick={() => { setActiveTab('home'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">Home</button>
+                 <button onClick={() => { setActiveTab('gaming'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">Gaming</button>
+                 <button onClick={() => { setActiveTab('casual'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">Professional</button>
+                 <button onClick={() => { setActiveTab('cheap-deals'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">Cheap Deals</button>
+                 <button onClick={() => { setActiveTab('brand-new'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">New Arrivals</button>
+               </div>
             </motion.div>
           )}
         </AnimatePresence>
