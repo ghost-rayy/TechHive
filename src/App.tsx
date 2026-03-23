@@ -499,6 +499,9 @@ function CartView({ items, onRemove, onUpdate, total, onRequest, onStartShopping
 }
 
 function ProductModal({ product, onClose, onAdd }: { product: Product; onClose: () => void; onAdd: () => void }) {
+  const [showFullDesc, setShowFullDesc] = useState(false);
+  const truncatedDesc = product.description.slice(0, 150) + (product.description.length > 150 ? '...' : '');
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <motion.div
@@ -512,29 +515,42 @@ function ProductModal({ product, onClose, onAdd }: { product: Product; onClose: 
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="relative bg-neutral-900 border border-neutral-800 rounded-3xl w-full max-w-4xl overflow-hidden flex flex-col md:flex-row"
+        className="relative bg-neutral-900 border border-neutral-800 rounded-3xl w-full max-w-4xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
       >
-        <div className="md:w-1/2 aspect-square md:aspect-auto">
-          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+        <div className="md:w-1/2 overflow-hidden bg-neutral-950 flex items-center justify-center">
+          <img src={product.image} alt={product.name} className="w-full h-full object-contain md:object-cover" />
         </div>
-        <div className="md:w-1/2 p-8 md:p-12 flex flex-col">
-          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-neutral-400 hover:text-white"><X size={24} /></button>
+        <div className="md:w-1/2 p-8 md:p-10 flex flex-col overflow-y-auto custom-scrollbar">
+          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-neutral-400 hover:text-white z-10"><X size={24} /></button>
 
           <div className="flex items-center gap-2 mb-4">
-            <span className="bg-indigo-600/20 text-indigo-400 text-xs font-bold px-2 py-1 rounded uppercase tracking-widest">{product.category}</span>
-            <div className="flex items-center gap-1 text-yellow-500">
+            <span className="bg-indigo-600/20 text-indigo-400 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest">{product.category.replace('-', ' ')}</span>
+            <div className="flex items-center gap-1.5 text-yellow-500 bg-yellow-500/5 px-2 py-1 rounded-lg">
               <Star size={14} fill="currentColor" />
-              <span className="text-sm font-bold">{product.rating}</span>
+              <span className="text-sm font-black">{product.rating}</span>
             </div>
           </div>
 
-          <h2 className="text-3xl font-black mb-4">{product.name}</h2>
-          <p className="text-neutral-400 mb-8 leading-relaxed">{product.description}</p>
+          <h2 className="text-3xl font-black mb-4 leading-tight">{product.name}</h2>
+          <div className="mb-8">
+            <p className="text-neutral-400 leading-relaxed text-sm">
+              {showFullDesc ? product.description : truncatedDesc}
+            </p>
+            {product.description.length > 150 && (
+              <button 
+                onClick={() => setShowFullDesc(!showFullDesc)}
+                className="mt-3 text-indigo-400 hover:text-indigo-300 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 transition-colors"
+              >
+                {showFullDesc ? 'Show Less' : 'View full description'}
+                <ArrowRight size={12} className={showFullDesc ? '-rotate-90' : 'rotate-90'} />
+              </button>
+            )}
+          </div>
 
-          {product.specs && (
+          {product.specs && product.specs.length > 0 && (
             <div className="grid grid-cols-2 gap-3 mb-8">
               {product.specs.map(spec => (
-                <div key={spec} className="bg-neutral-800/50 p-3 rounded-xl border border-neutral-700/50 text-xs font-medium text-neutral-300">
+                <div key={spec} className="bg-neutral-800/40 p-3 rounded-2xl border border-white/5 text-[10px] font-bold text-neutral-400 uppercase tracking-tight">
                   {spec}
                 </div>
               ))}

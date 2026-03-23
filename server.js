@@ -101,7 +101,8 @@ app.get('/api/products', async (req, res) => {
         price: parseFloat(row.price),
         specs: parsedSpecs,
         isNew: !!row.isnew,
-        image: row.image || 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=800&auto=format&fit=crop'
+        image: row.image || 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=800&auto=format&fit=crop',
+        rating: parseFloat(row.rating || 4.5)
       };
     });
     res.json(products);
@@ -111,7 +112,7 @@ app.get('/api/products', async (req, res) => {
 });
 
 app.post('/api/products', upload.single('image'), async (req, res) => {
-  const { name, category, price, description, specs, isNew } = req.body;
+  const { name, category, price, description, specs, isNew, rating } = req.body;
   const id = Date.now().toString();
   
   let image = req.body.image; 
@@ -137,13 +138,10 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
   }
 
   try {
+    const finalRating = rating ? parseFloat(rating) : 4.5;
     await pool.query(
-      "INSERT INTO products (id, name, category, price, description, image, specs, rating, reviews, isNew) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
-      [
-        id, name, category, price, description || '', image || '',
-        finalSpecs, 5.0, 0,
-        isNew === 'true' || isNew === 'on' || isNew === 1
-      ]
+      'INSERT INTO products (id, name, category, price, description, image, specs, isNew, rating, reviews) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+      [id, name, category, price, description || '', image || '', finalSpecs, isNew === 'true', finalRating, 0]
     );
     res.status(201).json({ message: 'Product added successfully', id });
   } catch (err) {
