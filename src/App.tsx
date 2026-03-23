@@ -8,9 +8,9 @@ import { Product, PurchaseRequest } from './types';
 import { useState, useMemo, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000'
-  : window.location.origin;
+  : '');
 
 type Tab = 'home' | 'gaming' | 'casual' | 'budget' | 'low-cost' | 'cheap-deals' | 'cart';
 
