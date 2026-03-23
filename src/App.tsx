@@ -8,6 +8,10 @@ import { Product, PurchaseRequest } from './types';
 import { useState, useMemo, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:5000'
+  : window.location.origin;
+
 type Tab = 'home' | 'gaming' | 'casual' | 'budget' | 'low-cost' | 'cheap-deals' | 'cart';
 
 interface CartItem extends Product {
@@ -28,7 +32,7 @@ export default function App() {
 function StoreFront() {
   useEffect(() => {
     // Record unique visitor
-    fetch('http://localhost:5000/api/visit', { method: 'POST' }).catch(() => { });
+    fetch(`${API_BASE_URL}/api/visit`, { method: 'POST' }).catch(() => { });
   }, []);
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -40,7 +44,7 @@ function StoreFront() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/products')
+    fetch(`${API_BASE_URL}/api/products`)
       .then(res => res.json())
       .then(data => {
         setProducts(data);
@@ -578,7 +582,7 @@ function RequestModal({ onClose, cartInfo, total, onComplete }: { onClose: () =>
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/requests', {
+      const response = await fetch(`${API_BASE_URL}/api/requests`, {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
@@ -684,7 +688,7 @@ function AdminDashboard() {
 
   const fetchRequests = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/requests');
+      const response = await fetch(`${API_BASE_URL}/api/requests`);
       const data = await response.json();
       setRequests(data);
     } catch (err) {
@@ -694,7 +698,7 @@ function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/stats/summary');
+      const res = await fetch(`${API_BASE_URL}/api/stats/summary`);
       const data = await res.json();
       setVisitorCount(data.totalVisitors);
     } catch (err) {
@@ -713,7 +717,7 @@ function AdminDashboard() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/products');
+      const res = await fetch(`${API_BASE_URL}/api/products`);
       const data = await res.json();
       setProducts(data);
     } catch (err) {
@@ -726,7 +730,7 @@ function AdminDashboard() {
   const deleteProduct = async (id: string) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
     try {
-      await fetch(`http://localhost:5000/api/products/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE_URL}/api/products/${id}`, { method: 'DELETE' });
       fetchProducts();
     } catch (err) {
       console.error(err);
@@ -922,7 +926,7 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
     formData.set('isNew', isNew);
 
     try {
-      await fetch('http://localhost:5000/api/products', {
+      await fetch(`${API_BASE_URL}/api/products`, {
         method: 'POST',
         body: formData
       });
@@ -1026,40 +1030,43 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar space-y-4">
-            {products.map(product => (
-              <div key={product.id} className="bg-black/40 border border-neutral-800/50 p-5 rounded-3xl group flex items-center justify-between hover:border-neutral-700 transition-all hover:bg-neutral-950/50">
-                <div className="flex items-center gap-6">
-                  <div className="relative">
-                    <img src={product.image} className="w-20 h-20 object-cover rounded-2xl border border-neutral-800" alt="" />
-                    {product.isNew && <div className="absolute -top-2 -right-2 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-[10px] font-bold animate-pulse">N</div>}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold mb-1 leading-tight">{product.name}</h3>
-                    <div className="flex items-center gap-3">
-                      <span className="text-indigo-400 font-bold">₵ {product.price}</span>
-                      <span className="w-1 h-1 bg-neutral-800 rounded-full" />
-                      <span className="text-sm text-neutral-500 capitalize">{product.category}</span>
+            {products.map(product => {
+              const absoluteImage = product.image.startsWith('http') ? product.image : `${API_BASE_URL}${product.image}`;
+              return (
+                <div key={product.id} className="bg-black/40 border border-neutral-800/50 p-5 rounded-3xl group flex items-center justify-between hover:border-neutral-700 transition-all hover:bg-neutral-950/50">
+                  <div className="flex items-center gap-6">
+                    <div className="relative">
+                      <img src={absoluteImage} className="w-20 h-20 object-cover rounded-2xl border border-neutral-800" alt="" />
+                      {product.isNew && <div className="absolute -top-2 -right-2 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-[10px] font-bold animate-pulse">N</div>}
                     </div>
-                    <div className="flex gap-2 mt-3">
-                      <span className="text-[8px] font-black px-2 py-0.5 bg-green-500/10 text-green-400 rounded uppercase tracking-widest">In Stock</span>
-                      {product.isNew && <span className="text-[8px] font-black px-2 py-0.5 bg-indigo-500/10 text-indigo-400 rounded uppercase tracking-widest">New</span>}
+                    <div>
+                      <h3 className="text-lg font-bold mb-1 leading-tight">{product.name}</h3>
+                      <div className="flex items-center gap-3">
+                        <span className="text-indigo-400 font-bold">₵ {product.price}</span>
+                        <span className="w-1 h-1 bg-neutral-800 rounded-full" />
+                        <span className="text-sm text-neutral-500 capitalize">{product.category}</span>
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <span className="text-[8px] font-black px-2 py-0.5 bg-green-500/10 text-green-400 rounded uppercase tracking-widest">In Stock</span>
+                        {product.isNew && <span className="text-[8px] font-black px-2 py-0.5 bg-indigo-500/10 text-indigo-400 rounded uppercase tracking-widest">New</span>}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                  <button className="p-3 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-xl transition-all">
-                    <Sparkles size={18} />
-                  </button>
-                  <button
-                    onClick={() => onDelete(product.id)}
-                    className="p-3 text-neutral-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                    <button className="p-3 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-xl transition-all">
+                      <Sparkles size={18} />
+                    </button>
+                    <button
+                      onClick={() => onDelete(product.id)}
+                      className="p-3 text-neutral-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -1071,7 +1078,7 @@ function RequestsSection({ requests, loading, onSuccess }: { requests: PurchaseR
   const [selectedRequest, setSelectedRequest] = useState<PurchaseRequest | null>(null);
   const fulfillRequest = async (id: string) => {
     try {
-      await fetch(`http://localhost:5000/api/requests/${id}`, {
+      await fetch(`${API_BASE_URL}/api/requests/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ status: 'completed' }),
         headers: { 'Content-Type': 'application/json' }
@@ -1086,7 +1093,7 @@ function RequestsSection({ requests, loading, onSuccess }: { requests: PurchaseR
   const deleteRequest = async (id: string) => {
     if (!confirm('Are you sure you want to delete this request?')) return;
     try {
-      await fetch(`http://localhost:5000/api/requests/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE_URL}/api/requests/${id}`, { method: 'DELETE' });
       onSuccess();
     } catch (err) {
       alert('Failed to delete request');
