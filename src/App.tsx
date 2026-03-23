@@ -8,7 +8,7 @@ import { Product, PurchaseRequest } from './types';
 import { useState, useMemo, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 
-type Tab = 'home' | 'gaming' | 'casual' | 'budget' | 'low-cost' | 'brand-new' | 'cheap-deals' | 'cart';
+type Tab = 'home' | 'gaming' | 'casual' | 'budget' | 'low-cost' | 'cheap-deals' | 'cart';
 
 interface CartItem extends Product {
   quantity: number;
@@ -80,7 +80,6 @@ function StoreFront() {
 
   const filteredProducts = useMemo(() => {
     if (activeTab === 'home' || activeTab === 'cart') return products;
-    if (activeTab === 'brand-new') return products.filter(p => p.isNew);
     if (activeTab === 'cheap-deals') return products.filter(p => p.category === 'budget' || p.category === 'low-cost' || p.price < 3000);
     if (activeTab === 'low-cost') return products.filter(p => p.category === 'low-cost');
     if (activeTab === 'budget') return products.filter(p => p.category === 'budget');
@@ -115,7 +114,6 @@ function StoreFront() {
               <TabButton active={activeTab === 'gaming'} onClick={() => setActiveTab('gaming')} label="Gaming" icon={<Gamepad2 size={18} />} />
               <TabButton active={activeTab === 'casual'} onClick={() => setActiveTab('casual')} label="Professional" icon={<Briefcase size={18} />} />
               <TabButton active={activeTab === 'cheap-deals'} onClick={() => setActiveTab('cheap-deals')} label="Cheap Deals" icon={<Tag size={18} />} />
-              <TabButton active={activeTab === 'brand-new'} onClick={() => setActiveTab('brand-new')} label="New Arrivals" icon={<Sparkles size={18} />} />
             </nav>
           </div>
 
@@ -154,7 +152,6 @@ function StoreFront() {
                  <button onClick={() => { setActiveTab('gaming'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">Gaming</button>
                  <button onClick={() => { setActiveTab('casual'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">Professional</button>
                  <button onClick={() => { setActiveTab('cheap-deals'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">Cheap Deals</button>
-                 <button onClick={() => { setActiveTab('brand-new'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">New Arrivals</button>
                </div>
             </motion.div>
           )}
@@ -293,9 +290,6 @@ function HeroSection({ onExplore }: { onExplore: () => void }) {
       exit={{ opacity: 0, y: -20 }}
       className="max-w-7xl mx-auto px-4 pt-16 md:pt-24 text-center"
     >
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold tracking-widest uppercase mb-6 border border-indigo-500/20">
-        <Sparkles size={14} /> New Season Arrivals
-      </div>
       <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-gradient-to-r from-white via-neutral-200 to-neutral-500 bg-clip-text text-transparent">
         Elevate Your Digital <br /> Performance.
       </h1>
