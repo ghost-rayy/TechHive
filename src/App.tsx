@@ -742,12 +742,12 @@ function AdminDashboard() {
   };
 
   const deleteProduct = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
     try {
       await fetch(`${API_BASE_URL}/api/products/${id}`, { method: 'DELETE' });
       fetchProducts();
     } catch (err) {
       console.error(err);
+      throw err; // Re-throw so the UI can catch it and show error toast
     }
   };
 
@@ -934,7 +934,19 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  const showNotify = (message: string, type: 'success' | 'error' = 'success') => {
+    setNotification({ message, type });
+  };
 
   const handleFile = (file: File) => {
     if (file && file.type.startsWith('image/')) {
@@ -981,7 +993,6 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
     setFormLoading(true);
     const formData = new FormData(e.currentTarget);
     
-    // Convert checkbox to string
     const isNewCheckbox = formData.get('isNew') === 'on' ? 'true' : 'false';
     formData.set('isNew', isNewCheckbox);
 
@@ -1002,16 +1013,51 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
         (e.target as HTMLFormElement).reset();
         setPreview(null);
         setEditingProduct(null);
+        showNotify(editingProduct ? 'Product updated successfully!' : 'Product added successfully!');
+      } else {
+        showNotify('Failed to save product', 'error');
       }
     } catch (err) {
-      console.error(err);
+      showNotify('Error connecting to server', 'error');
     } finally {
       setFormLoading(false);
     }
   };
 
+  const getCategoryLabel = (cat: string) => {
+    switch (cat) {
+      case 'gaming': return 'Gaming';
+      case 'casual': return 'Professional';
+      case 'budget': return 'Cheap Deals';
+      default: return cat;
+    }
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 animate-in fade-in duration-500 lg:h-full lg:max-h-[85vh]">
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 animate-in fade-in duration-500 lg:h-full lg:max-h-[85vh] relative">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, x: 20 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className={`fixed top-6 right-6 z-[100] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border ${
+              notification.type === 'success' 
+                ? 'bg-green-500/10 border-green-500/20 text-green-400' 
+                : 'bg-red-500/10 border-red-500/20 text-red-400'
+            }`}
+          >
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+              notification.type === 'success' ? 'bg-green-500/20' : 'bg-red-500/20'
+            }`}>
+              {notification.type === 'success' ? <Sparkles size={16} /> : <X size={16} />}
+            </div>
+            <p className="font-bold text-sm">{notification.message}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Product Form - Left Column */}
       <div className="lg:col-span-2 bg-neutral-900/40 border border-neutral-800/50 p-8 rounded-[2.5rem] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between mb-8">
@@ -1167,7 +1213,7 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
                       <div className="flex items-center gap-3">
                         <span className="text-indigo-400 font-bold">₵ {product.price}</span>
                         <span className="w-1 h-1 bg-neutral-800 rounded-full" />
-                        <span className="text-sm text-neutral-500 capitalize">{product.category.replace('-', ' ')}</span>
+                        <span className="text-sm text-neutral-500 capitalize">{getCategoryLabel(product.category)}</span>
                       </div>
                       <div className="flex gap-2 mt-3">
                         <span className="text-[8px] font-black px-2 py-0.5 bg-green-500/10 text-green-400 rounded uppercase tracking-widest">In Stock</span>
@@ -1184,7 +1230,16 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
                       <Sparkles size={18} />
                     </button>
                     <button
-                      onClick={() => onDelete(product.id)}
+                      onClick={async () => {
+                        if (confirm('Delete this product?')) {
+                          try {
+                            await onDelete(product.id);
+                            showNotify('Product deleted');
+                          } catch (e) {
+                            showNotify('Failed to delete', 'error');
+                          }
+                        }
+                      }}
                       className="p-3 text-neutral-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
                     >
                       <Trash2 size={18} />
