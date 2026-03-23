@@ -1,7 +1,7 @@
 import {
   ShoppingCart, Star, Plus, Minus, X, ArrowRight, Gamepad2, Briefcase, Tag,
   Sparkles, ShoppingBag, CreditCard, ChevronRight, MessageCircle, Trash2,
-  LayoutDashboard, PlusCircle, Package, Mail, Phone, Menu, ChevronLeft
+  LayoutDashboard, PlusCircle, Package, Mail, Phone, Menu, ChevronLeft, Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product, PurchaseRequest } from './types';
@@ -51,6 +51,9 @@ function StoreFront() {
   const [isRequesting, setIsRequesting] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/products`)
@@ -92,14 +95,33 @@ function StoreFront() {
   const cartTotal = useMemo(() => cart.reduce((acc, item) => acc + (item.price * item.quantity), 0), [cart]);
 
   const filteredProducts = useMemo(() => {
-    if (activeTab === 'home' || activeTab === 'cart') return products;
-    if (activeTab === 'cheap-deals') return products.filter(p => p.category === 'budget' || p.category === 'low-cost' || p.price < 3000);
-    if (activeTab === 'low-cost') return products.filter(p => p.category === 'low-cost');
-    if (activeTab === 'budget') return products.filter(p => p.category === 'budget');
-    if (activeTab === 'casual') return products.filter(p => p.category === 'casual');
-    if (activeTab === 'gaming') return products.filter(p => p.category === 'gaming');
-    return products;
-  }, [activeTab, products]);
+    let result = products;
+
+    // Search filter
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        getCategoryLabel(p.category).toLowerCase().includes(q)
+      );
+    }
+
+    // Category filter (ignored if searching for a global experience, or we can keep it)
+    // Actually, user said "beside the card icon", usually implying it's a general search.
+    // I'll make it so if searchQuery exists, we ignore the activeTab category filter
+    // unless the user specifically wants to search WITHIN a category.
+    // Let's decide: Global search is usually better.
+    if (searchQuery) return result;
+
+    if (activeTab === 'home' || activeTab === 'cart') return result;
+    if (activeTab === 'cheap-deals') return result.filter(p => p.category === 'budget' || p.category === 'low-cost' || p.price < 3000);
+    if (activeTab === 'low-cost') return result.filter(p => p.category === 'low-cost');
+    if (activeTab === 'budget') return result.filter(p => p.category === 'budget');
+    if (activeTab === 'casual') return result.filter(p => p.category === 'casual');
+    if (activeTab === 'gaming') return result.filter(p => p.category === 'gaming');
+    return result;
+  }, [activeTab, products, searchQuery]);
 
   if (loading) {
     return (
@@ -129,6 +151,47 @@ function StoreFront() {
           </nav>
 
           <div className="flex items-center gap-3">
+            <div className="relative flex items-center">
+              <AnimatePresence>
+                {isSearchOpen && (
+                  <motion.div
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: 240, opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
+                    className="absolute right-0 flex items-center"
+                  >
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onBlur={() => !searchQuery && setIsSearchOpen(false)}
+                      placeholder="Search laptops..."
+                      className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm focus:ring-2 ring-indigo-500/50 outline-none pr-10"
+                      autoFocus
+                    />
+                    {searchQuery && (
+                      <button 
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-3 text-neutral-500 hover:text-white"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
+              {!isSearchOpen && (
+                <button
+                  onClick={() => setIsSearchOpen(true)}
+                  className="p-3 bg-neutral-900 border border-neutral-800 rounded-xl hover:border-indigo-500/50 transition-all group"
+                >
+                  <Search size={20} className="text-neutral-400 group-hover:text-indigo-400 transition-colors" />
+                </button>
+              )}
+            </div>
+
             <button
               onClick={() => setActiveTab('cart')}
               className="relative p-3 bg-neutral-900 border border-neutral-800 rounded-xl hover:border-indigo-500/50 transition-all group"
@@ -186,8 +249,14 @@ function StoreFront() {
             <section className="max-w-7xl mx-auto px-4 mt-12">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h2 className="text-3xl font-bold capitalize">{activeTab.replace('-', ' ')}</h2>
-                  <p className="text-neutral-400 mt-1">Discover our hand-picked selection of premium devices.</p>
+                  <h2 className="text-3xl font-bold capitalize">
+                    {searchQuery ? `Search Results for "${searchQuery}"` : activeTab.replace('-', ' ')}
+                  </h2>
+                  <p className="text-neutral-400 mt-1">
+                    {searchQuery 
+                      ? `Found ${filteredProducts.length} premium ${filteredProducts.length === 1 ? 'device' : 'devices'} matching your search.`
+                      : 'Discover our hand-picked selection of premium devices.'}
+                  </p>
                 </div>
               </div>
               {filteredProducts.length === 0 ? (
@@ -195,10 +264,21 @@ function StoreFront() {
                   <div className="w-20 h-20 bg-neutral-900 rounded-3xl flex items-center justify-center mb-8 text-neutral-700 shadow-xl border border-neutral-800">
                     <Package size={36} />
                   </div>
-                  <h3 className="text-2xl font-black mb-3">No Laptops Available In This Section Yet</h3>
+                  <h3 className="text-2xl font-black mb-3">
+                    {searchQuery ? 'No Matching Laptops Found' : 'No Laptops Available In This Section Yet'}
+                  </h3>
                   <p className="text-neutral-500 max-w-sm mx-auto leading-relaxed">
-                    We're currently updating our inventory for the <span className="text-indigo-400 font-bold">{activeTab.replace('-', ' ')}</span> collection. 
-                    Stay tuned for premium performance tech.
+                    {searchQuery ? (
+                      <>
+                        We couldn't find any products matching <span className="text-indigo-400 font-bold">"{searchQuery}"</span>. 
+                        Try adjusting your keywords or categories.
+                      </>
+                    ) : (
+                      <>
+                        We're currently updating our inventory for the <span className="text-indigo-400 font-bold">{activeTab.replace('-', ' ')}</span> collection. 
+                        Stay tuned for premium performance tech.
+                      </>
+                    )}
                   </p>
                   <button onClick={() => setActiveTab('home')} className="mt-8 px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl font-bold transition-all">
                     Browse All Products
