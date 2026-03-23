@@ -1,7 +1,7 @@
-import { 
-  ShoppingCart, Star, Plus, Minus, X, ArrowRight, Gamepad2, Briefcase, Tag, 
-  Sparkles, ShoppingBag, CreditCard, ChevronRight, MessageCircle, Trash2, 
-  LayoutDashboard, PlusCircle, Package, Mail, Phone, Menu, ChevronLeft 
+import {
+  ShoppingCart, Star, Plus, Minus, X, ArrowRight, Gamepad2, Briefcase, Tag,
+  Sparkles, ShoppingBag, CreditCard, ChevronRight, MessageCircle, Trash2,
+  LayoutDashboard, PlusCircle, Package, Mail, Phone, Menu, ChevronLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product, PurchaseRequest } from './types';
@@ -28,7 +28,7 @@ export default function App() {
 function StoreFront() {
   useEffect(() => {
     // Record unique visitor
-    fetch('http://localhost:5000/api/visit', { method: 'POST' }).catch(() => {});
+    fetch('http://localhost:5000/api/visit', { method: 'POST' }).catch(() => { });
   }, []);
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -100,13 +100,13 @@ function StoreFront() {
     <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans selection:bg-indigo-500/30">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800">
-          <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3 group cursor-pointer" onClick={() => setActiveTab('home')}>
-              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
-                <img src="/logo2.png" alt="TechHive" className="w-6 h-6 object-contain brightness-0 invert" />
+              <div className="w-15 h-15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <img src="/logo3.png" alt="TechHive" className="w-15 h-15 object-contain" />
               </div>
-              <span className="text-xl font-black tracking-tighter">TechHive</span>
+              <span style={{ marginLeft: '-20px' }} className="text-xl font-black tracking-tighter">Tech<span className="text-indigo-500">Hive</span></span>
             </div>
 
             <nav className="hidden lg:flex items-center gap-1 bg-neutral-900/50 p-1.5 rounded-full border border-neutral-800/50">
@@ -129,7 +129,7 @@ function StoreFront() {
                 </span>
               )}
             </button>
-            <button 
+            <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="lg:hidden p-3 bg-neutral-900 border border-neutral-800 rounded-xl hover:border-indigo-500/50 transition-all"
             >
@@ -314,11 +314,11 @@ function HeroSection({ onExplore }: { onExplore: () => void }) {
   );
 }
 
-function ProductCard({ 
-  product, onAdd, onView, quantity, onUpdate, onRemove 
-}: { 
-  product: Product; 
-  onAdd: () => void; 
+function ProductCard({
+  product, onAdd, onView, quantity, onUpdate, onRemove
+}: {
+  product: Product;
+  onAdd: () => void;
   onView: () => void;
   quantity: number;
   onUpdate: (delta: number) => void;
@@ -361,24 +361,24 @@ function ProductCard({
 
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-neutral-800/50">
           <span className="text-xl font-black text-white">₵ {product.price}</span>
-          
+
           <AnimatePresence mode="wait">
             {quantity > 0 ? (
-              <motion.div 
+              <motion.div
                 key="quantity-selector"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 className="flex items-center gap-3 bg-indigo-600/10 border border-indigo-500/30 p-1 rounded-xl"
               >
-                <button 
+                <button
                   onClick={() => quantity === 1 ? onRemove() : onUpdate(-1)}
                   className="p-1.5 hover:bg-indigo-600/20 text-indigo-400 rounded-lg transition-all"
                 >
                   <Minus size={16} />
                 </button>
                 <span className="font-bold text-sm min-w-[1rem] text-center text-indigo-100">{quantity}</span>
-                <button 
+                <button
                   onClick={() => onUpdate(1)}
                   className="p-1.5 hover:bg-indigo-600/20 text-indigo-400 rounded-lg transition-all"
                 >
@@ -741,7 +741,7 @@ function AdminDashboard() {
       <aside className={`fixed lg:relative top-0 bottom-0 left-0 z-[90] w-80 lg:w-80 border-r border-neutral-800/80 bg-[#0a0a0a] flex flex-col p-8 transition-transform duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="flex items-center gap-3 mb-12">
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <img src="/logo2.png" alt="TechHive" className="w-6 h-6 object-contain brightness-0 invert" />
+            <img src="/logo3.png" alt="TechHive" className="w-6 h-6 object-contain brightness-0 invert" />
           </div>
           <span className="text-xl font-black tracking-tighter">TechHive Admin</span>
           <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden ml-auto p-2 text-neutral-400 hover:text-white">
@@ -753,8 +753,8 @@ function AdminDashboard() {
           <button
             onClick={() => setActiveSection('dashboard')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeSection === 'dashboard'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                : 'text-neutral-400 hover:bg-neutral-900'
+              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+              : 'text-neutral-400 hover:bg-neutral-900'
               }`}
           >
             <LayoutDashboard size={20} />
@@ -763,8 +763,8 @@ function AdminDashboard() {
           <button
             onClick={() => setActiveSection('products')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeSection === 'products'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                : 'text-neutral-400 hover:bg-neutral-900'
+              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+              : 'text-neutral-400 hover:bg-neutral-900'
               }`}
           >
             <ShoppingBag size={20} />
@@ -774,8 +774,8 @@ function AdminDashboard() {
           <button
             onClick={() => setActiveSection('requests')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeSection === 'requests'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                : 'text-neutral-400 hover:bg-neutral-900'
+              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+              : 'text-neutral-400 hover:bg-neutral-900'
               }`}
           >
             <MessageCircle size={20} />
@@ -797,10 +797,10 @@ function AdminDashboard() {
         {/* Mobile Header Toggle */}
         <div className="lg:hidden flex items-center justify-between mb-8 pb-4 border-b border-neutral-800">
           <div className="flex items-center gap-3">
-             <button onClick={() => setIsSidebarOpen(true)} className="p-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-400">
-               <Menu size={20} />
-             </button>
-             <span className="font-bold text-sm tracking-tight">Admin Menu</span>
+            <button onClick={() => setIsSidebarOpen(true)} className="p-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-400">
+              <Menu size={20} />
+            </button>
+            <span className="font-bold text-sm tracking-tight">Admin Menu</span>
           </div>
           <Link to="/" className="p-2 text-neutral-400 hover:text-white">
             <ChevronLeft size={20} />
@@ -817,10 +817,10 @@ function AdminDashboard() {
             loading={loading}
           />
         ) : (
-          <RequestsSection 
-            requests={requests} 
-            loading={loading} 
-            onSuccess={fetchRequests} 
+          <RequestsSection
+            requests={requests}
+            loading={loading}
+            onSuccess={fetchRequests}
           />
         )}
       </main>
@@ -831,7 +831,7 @@ function AdminDashboard() {
 function OverviewSection({ products, requests, visitorCount }: { products: Product[]; requests: PurchaseRequest[]; visitorCount: number }) {
   const totalRevenue = useMemo(() => requests.filter(r => r.status === 'completed').reduce((acc, r) => acc + r.total, 0), [requests]);
   const newRequests = useMemo(() => requests.filter(r => r.status === 'pending').length, [requests]);
-  
+
   const stats = [
     { label: 'Total Visitors', value: visitorCount.toLocaleString(), change: 'Live IPs', icon: <MessageCircle className="text-blue-400" /> },
     { label: 'Total Products', value: products.length.toString(), change: 'Live', icon: <ShoppingBag className="text-indigo-400" /> },
@@ -1127,13 +1127,13 @@ function RequestsSection({ requests, loading, onSuccess }: { requests: PurchaseR
                     <p className="text-xl font-black text-white">₵ {request.total.toLocaleString()}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <button 
+                    <button
                       onClick={() => setSelectedRequest(request)}
                       className="px-5 py-3 h-12 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl font-bold transition-all text-sm"
                     >
                       View Details
                     </button>
-                    <button 
+                    <button
                       onClick={() => deleteRequest(request.id)}
                       className="w-12 h-12 flex items-center justify-center bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition-all"
                     >
@@ -1160,7 +1160,7 @@ function RequestsSection({ requests, loading, onSuccess }: { requests: PurchaseR
                 </div>
                 <button onClick={() => setSelectedRequest(null)} className="p-2 text-neutral-400 hover:text-white"><X size={24} /></button>
               </div>
-              
+
               <div className="p-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-10">
                   <div className="space-y-4">
@@ -1199,7 +1199,7 @@ function RequestsSection({ requests, loading, onSuccess }: { requests: PurchaseR
                   <p className="text-3xl font-black text-white">₵ {selectedRequest.total.toLocaleString()}</p>
                 </div>
                 {selectedRequest.status === 'pending' ? (
-                  <button 
+                  <button
                     onClick={() => fulfillRequest(selectedRequest.id)}
                     className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold transition-all"
                   >
