@@ -180,22 +180,38 @@ function StoreFront() {
                   <p className="text-neutral-400 mt-1">Discover our hand-picked selection of premium devices.</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredProducts.map((product) => {
-                  const cartItem = cart.find(item => item.id === product.id);
-                  return (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onView={() => setSelectedProduct(product)}
-                      onAdd={() => addToCart(product)}
-                      quantity={cartItem ? cartItem.quantity : 0}
-                      onUpdate={(delta) => updateQuantity(product.id, delta)}
-                      onRemove={() => removeFromCart(product.id)}
-                    />
-                  );
-                })}
-              </div>
+              {filteredProducts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-24 bg-neutral-900/30 border border-neutral-800/80 rounded-[3rem] text-center w-full">
+                  <div className="w-20 h-20 bg-neutral-900 rounded-3xl flex items-center justify-center mb-8 text-neutral-700 shadow-xl border border-neutral-800">
+                    <Package size={36} />
+                  </div>
+                  <h3 className="text-2xl font-black mb-3">No Gear Available Yet</h3>
+                  <p className="text-neutral-500 max-w-sm mx-auto leading-relaxed">
+                    We're currently updating our inventory for the <span className="text-indigo-400 font-bold">{activeTab.replace('-', ' ')}</span> collection. 
+                    Stay tuned for premium performance tech.
+                  </p>
+                  <button onClick={() => setActiveTab('home')} className="mt-8 px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl font-bold transition-all">
+                    Browse All Products
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredProducts.map((product) => {
+                    const cartItem = cart.find(item => item.id === product.id);
+                    return (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        onView={() => setSelectedProduct(product)}
+                        onAdd={() => addToCart(product)}
+                        quantity={cartItem ? cartItem.quantity : 0}
+                        onUpdate={(delta) => updateQuantity(product.id, delta)}
+                        onRemove={() => removeFromCart(product.id)}
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </section>
           )}
         </AnimatePresence>
