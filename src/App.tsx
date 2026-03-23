@@ -152,7 +152,6 @@ function StoreFront() {
                 <button onClick={() => { setActiveTab('gaming'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">Gaming</button>
                 <button onClick={() => { setActiveTab('casual'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">Professional</button>
                 <button onClick={() => { setActiveTab('brand-new'); setIsMenuOpen(false); }} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm">New Arrivals</button>
-                <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="p-4 bg-neutral-900 rounded-2xl text-left font-bold text-sm col-span-2">Admin Dashboard</Link>
               </div>
             </motion.div>
           )}
