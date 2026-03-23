@@ -986,10 +986,8 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
               <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Category</label>
               <select name="category" className="w-full bg-neutral-950/50 border border-neutral-800 rounded-2xl px-5 py-4 outline-none focus:border-indigo-500 transition-all appearance-none cursor-pointer">
                 <option value="gaming">Gaming</option>
-                <option value="casual">Casual</option>
-                <option value="budget">Budget</option>
-                <option value="low-cost">Low Cost</option>
-                <option value="accessory">Accessory</option>
+                <option value="casual">Professional</option>
+                <option value="budget">Cheap Deals</option>
               </select>
             </div>
             <div className="space-y-2">
