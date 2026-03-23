@@ -104,22 +104,20 @@ function StoreFront() {
     <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans selection:bg-indigo-500/30">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800">
-        <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-3 group cursor-pointer" onClick={() => setActiveTab('home')}>
-              <div className="w-15 h-15 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <img src="/logo3.png" alt="TechHive" className="w-15 h-15 object-contain" />
-              </div>
-              <span style={{ marginLeft: '-20px' }} className="text-xl font-black tracking-tighter">Tech<span className="text-indigo-500">Hive</span></span>
+        <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between relative">
+          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => setActiveTab('home')}>
+            <div className="w-15 h-15 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <img src="/logo3.png" alt="TechHive" className="w-15 h-15 object-contain" />
             </div>
-
-            <nav className="hidden lg:flex items-center gap-1 bg-neutral-900/50 p-1.5 rounded-full border border-neutral-800/50">
-              <TabButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} label="Home" icon={<LayoutDashboard size={18} />} />
-              <TabButton active={activeTab === 'gaming'} onClick={() => setActiveTab('gaming')} label="Gaming" icon={<Gamepad2 size={18} />} />
-              <TabButton active={activeTab === 'casual'} onClick={() => setActiveTab('casual')} label="Professional" icon={<Briefcase size={18} />} />
-              <TabButton active={activeTab === 'cheap-deals'} onClick={() => setActiveTab('cheap-deals')} label="Cheap Deals" icon={<Tag size={18} />} />
-            </nav>
+            <span style={{ marginLeft: '-20px' }} className="text-xl font-black tracking-tighter">Tech<span className="text-indigo-500">Hive</span></span>
           </div>
+
+          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 bg-neutral-900/50 p-1.5 rounded-full border border-neutral-800/50">
+            <TabButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} label="Home" icon={<LayoutDashboard size={18} />} />
+            <TabButton active={activeTab === 'gaming'} onClick={() => setActiveTab('gaming')} label="Gaming" icon={<Gamepad2 size={18} />} />
+            <TabButton active={activeTab === 'casual'} onClick={() => setActiveTab('casual')} label="Professional" icon={<Briefcase size={18} />} />
+            <TabButton active={activeTab === 'cheap-deals'} onClick={() => setActiveTab('cheap-deals')} label="Cheap Deals" icon={<Tag size={18} />} />
+          </nav>
 
           <div className="flex items-center gap-3">
             <button
