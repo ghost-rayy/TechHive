@@ -12,6 +12,15 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname =
   ? 'http://localhost:5000'
   : '');
 
+const getCategoryLabel = (cat: string) => {
+  switch (cat) {
+    case 'gaming': return 'Gaming';
+    case 'casual': return 'Professional';
+    case 'budget': return 'Cheap Deals';
+    default: return cat;
+  }
+};
+
 type Tab = 'home' | 'gaming' | 'casual' | 'budget' | 'low-cost' | 'cheap-deals' | 'cart';
 
 interface CartItem extends Product {
@@ -362,7 +371,7 @@ function ProductCard({
 
       <div className="p-5 flex-1 flex flex-col">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">{product.category.replace('-', ' ')}</span>
+          <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">{getCategoryLabel(product.category)}</span>
           <div className="flex items-center gap-1 text-yellow-500">
             <Star size={12} fill="currentColor" />
             <span className="text-xs font-bold">{product.rating}</span>
@@ -524,7 +533,7 @@ function ProductModal({ product, onClose, onAdd }: { product: Product; onClose: 
           <button onClick={onClose} className="absolute top-6 right-6 p-2 text-neutral-400 hover:text-white z-10"><X size={24} /></button>
 
           <div className="flex items-center gap-2 mb-4">
-            <span className="bg-indigo-600/20 text-indigo-400 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest">{product.category.replace('-', ' ')}</span>
+            <span className="bg-indigo-600/20 text-indigo-400 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest">{getCategoryLabel(product.category)}</span>
             <div className="flex items-center gap-1.5 text-yellow-500 bg-yellow-500/5 px-2 py-1 rounded-lg">
               <Star size={14} fill="currentColor" />
               <span className="text-sm font-black">{product.rating}</span>
@@ -1021,15 +1030,6 @@ function ManageProductsSection({ products, onDelete, onSuccess, loading }: {
       showNotify('Error connecting to server', 'error');
     } finally {
       setFormLoading(false);
-    }
-  };
-
-  const getCategoryLabel = (cat: string) => {
-    switch (cat) {
-      case 'gaming': return 'Gaming';
-      case 'casual': return 'Professional';
-      case 'budget': return 'Cheap Deals';
-      default: return cat;
     }
   };
 
