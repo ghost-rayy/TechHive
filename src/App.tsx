@@ -1291,7 +1291,7 @@ function OverviewSection({ products, requests, visitorCount, onResetVisitors }: 
                 </div>
                 <div className="flex-1">
                   <p className="font-bold text-neutral-200">New request from {request.name}</p>
-                  <p className="text-xs text-neutral-500 mt-1">{new Date(request.createdAt).toLocaleString()}</p>
+                  <p className="text-xs text-neutral-500 mt-1">{new Date(request.createdat).toLocaleString()}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-white text-sm">₵ {request.total.toLocaleString()}</p>
@@ -1728,7 +1728,7 @@ function RequestsSection({ requests, loading, onSuccess }: { requests: PurchaseR
               <div className="p-8 border-b border-neutral-800 flex items-center justify-between">
                 <div>
                   <h3 className="text-2xl font-bold">Order Details</h3>
-                  <p className="text-neutral-500 text-sm mt-1">ID: {selectedRequest.id} • {new Date(selectedRequest.createdAt).toLocaleDateString()}</p>
+                  <p className="text-neutral-500 text-sm mt-1">ID: {selectedRequest.id} • {new Date(selectedRequest.createdat).toLocaleDateString()}</p>
                 </div>
                 <button onClick={() => setSelectedRequest(null)} className="p-2 text-neutral-400 hover:text-white"><X size={24} /></button>
               </div>

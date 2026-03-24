@@ -20,7 +20,7 @@ export interface PurchaseRequest {
   items: { name: string; quantity: number; price: number }[];
   total: number;
   status: 'pending' | 'completed';
-  createdAt: string;
+  createdat: string;
 }
 
 export const PRODUCTS: Product[] = [
