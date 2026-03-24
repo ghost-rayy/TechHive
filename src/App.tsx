@@ -53,6 +53,7 @@ function StoreFront() {
   const [loading, setLoading] = useState(true);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isPartRequestOpen, setIsPartRequestOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -234,7 +235,12 @@ function StoreFront() {
 
       <main className="pt-20 pb-20">
         <AnimatePresence mode="wait">
-          {activeTab === 'home' && !searchQuery && <HeroSection onExplore={() => setActiveTab('gaming')} />}
+          {activeTab === 'home' && !searchQuery && (
+            <HeroSection 
+              onExplore={() => setActiveTab('gaming')} 
+              onRequestPart={() => setIsPartRequestOpen(true)}
+            />
+          )}
 
           {activeTab === 'cart' ? (
             <CartView
@@ -321,6 +327,13 @@ function StoreFront() {
         )}
       </AnimatePresence>
 
+      {/* Part Request Modal */}
+      <AnimatePresence>
+        {isPartRequestOpen && (
+          <PartRequestModal onClose={() => setIsPartRequestOpen(false)} />
+        )}
+      </AnimatePresence>
+
       {/* Request Form Modal */}
       <AnimatePresence>
         {isRequesting && (
@@ -373,7 +386,7 @@ function TabButton({ active, onClick, label, icon }: { active: boolean; onClick:
   );
 }
 
-function HeroSection({ onExplore }: { onExplore: () => void }) {
+function HeroSection({ onExplore, onRequestPart }: { onExplore: () => void; onRequestPart: () => void }) {
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
@@ -394,8 +407,11 @@ function HeroSection({ onExplore }: { onExplore: () => void }) {
         >
           Explore Collection <ArrowRight className="group-hover:translate-x-1 transition-transform" />
         </button>
-        <button className="px-8 py-4 bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-700 rounded-xl font-bold transition-all">
-          View Accessories
+        <button
+          onClick={onRequestPart}
+          className="px-8 py-4 bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-700 rounded-xl font-bold transition-all hover:scale-105 active:scale-95"
+        >
+          Request Laptop Part
         </button>
       </div>
 
@@ -664,6 +680,109 @@ function ProductModal({ product, onClose, onAdd }: { product: Product; onClose: 
   );
 }
 
+function PartRequestModal({ onClose }: { onClose: () => void }) {
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const data = {
+      brand: formData.get('brand'),
+      model: formData.get('model'),
+      part: formData.get('part'),
+      whatsapp: formData.get('whatsapp')
+    };
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/part-requests`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        setStep(2);
+      } else {
+        const result = await response.json();
+        setError(result.error || 'Oops! Submission failed.');
+      }
+    } catch (err) {
+      setError('Connection error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+      <motion.div
+        initial={{ scale: 0.9, y: 20, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        className="relative bg-neutral-900 border border-neutral-800 rounded-3xl w-full max-w-lg p-8"
+      >
+        <button onClick={onClose} className="absolute top-6 right-6 p-2 text-neutral-400 hover:text-white"><X size={24} /></button>
+
+        {step === 1 ? (
+          <>
+            <div className="bg-indigo-600/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-indigo-500">
+              <Package size={32} />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Request Laptop Part</h2>
+            <p className="text-neutral-400 mb-8 text-sm">Need a specific part? Tell us what you're looking for and we'll help you find it.</p>
+
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">Laptop Brand</label>
+                <input name="brand" type="text" className="w-full bg-neutral-800 border-none rounded-xl px-4 py-3 focus:ring-2 ring-indigo-500 outline-none" placeholder="e.g. Dell, HP, Apple" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">Model Number</label>
+                <input name="model" type="text" className="w-full bg-neutral-800 border-none rounded-xl px-4 py-3 focus:ring-2 ring-indigo-500 outline-none" placeholder="e.g. Latitude 5420" />
+                <p className="text-[10px] text-neutral-500 font-medium italic">Usually found at the bottom of the laptop</p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">Part Needed</label>
+                <input name="part" type="text" className="w-full bg-neutral-800 border-none rounded-xl px-4 py-3 focus:ring-2 ring-indigo-500 outline-none" placeholder="e.g. Keyboard, Screen, Battery" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">WhatsApp Number</label>
+                <input name="whatsapp" type="tel" className="w-full bg-neutral-800 border-none rounded-xl px-4 py-3 focus:ring-2 ring-indigo-500 outline-none" placeholder="+233 XX XXX XXXX" />
+              </div>
+
+              {error && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 mt-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+              >
+                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Submit Request'}
+              </button>
+            </form>
+          </>
+        ) : (
+          <div className="text-center py-8">
+            <div className="bg-green-500/20 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500">
+              <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-3xl font-bold mb-2">Request Sent!</h2>
+            <p className="text-neutral-400 mb-8">We've received your part request. Our team will check availability and message you on WhatsApp shortly.</p>
+            <button onClick={onClose} className="w-full py-4 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl font-bold transition-all">Done</button>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
 function RequestModal({ onClose, cartInfo, total, onComplete }: { onClose: () => void; cartInfo: CartItem[]; total: number; onComplete: () => void }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -780,11 +899,122 @@ function RequestModal({ onClose, cartInfo, total, onComplete }: { onClose: () =>
     </div>
   );
 }
+
+function PartRequestsSection({ requests, onRefresh }: { requests: any[]; onRefresh: () => void }) {
+  const updateStatus = async (id: string, status: string) => {
+    try {
+      await fetch(`${API_BASE_URL}/api/part-requests/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      onRefresh();
+    } catch (err) {
+      console.error("Failed to update status", err);
+    }
+  };
+
+  const deleteRequest = async (id: string) => {
+    try {
+      await fetch(`${API_BASE_URL}/api/part-requests/${id}`, { method: 'DELETE' });
+      onRefresh();
+    } catch (err) {
+      console.error("Failed to delete request", err);
+    }
+  };
+
+  return (
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Laptop Part Requests</h2>
+        <button onClick={onRefresh} className="p-2 hover:bg-neutral-800 rounded-lg text-neutral-400 transition-colors">
+          <Sparkles size={20} />
+        </button>
+      </div>
+
+      <div className="bg-neutral-900/50 border border-neutral-800 rounded-3xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-neutral-800 bg-neutral-950/50">
+                <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-widest">Brand/Model</th>
+                <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-widest">Part Needed</th>
+                <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-widest">WhatsApp</th>
+                <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-widest">Status</th>
+                <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-widest">Date</th>
+                <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-widest">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-800">
+              {requests.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-neutral-500">No part requests found</td>
+                </tr>
+              ) : (
+                requests.map((req) => (
+                  <tr key={req.id} className="hover:bg-neutral-800/30 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-white">{req.brand || 'Unknown'}</div>
+                      <div className="text-xs text-neutral-400">{req.model || 'No model specified'}</div>
+                    </td>
+                    <td className="px-6 py-4 text-neutral-300">{req.part || 'Not specified'}</td>
+                    <td className="px-6 py-4">
+                      <a href={`https://wa.me/${req.whatsapp?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-medium">
+                        {req.whatsapp || 'No number'}
+                      </a>
+                    </td>
+                    <td className="px-6 py-4">
+                      <select
+                        value={req.status}
+                        onChange={(e) => updateStatus(req.id, e.target.value)}
+                        className={`text-xs font-bold px-3 py-1 rounded-full border-none outline-none cursor-pointer ${
+                          req.status === 'completed' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
+                        }`}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-neutral-500">
+                      {new Date(req.createdat).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button onClick={() => deleteRequest(req.id)} className="p-2 text-neutral-500 hover:text-red-400 transition-colors">
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NavButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active
+        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+        : 'text-neutral-400 hover:bg-neutral-900'
+        }`}
+    >
+      {icon}
+      <span className="font-semibold">{label}</span>
+    </button>
+  );
+}
+
 function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [requests, setRequests] = useState<PurchaseRequest[]>([]);
+  const [partRequests, setPartRequests] = useState<any[]>([]);
   const [visitorCount, setVisitorCount] = useState(0);
-  const [activeSection, setActiveSection] = useState<'dashboard' | 'products' | 'requests'>('dashboard');
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'products' | 'requests' | 'part-requests'>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -798,6 +1028,21 @@ function AdminDashboard() {
       console.error("Failed to fetch requests", err);
     }
   };
+
+  const fetchPartRequests = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/part-requests`);
+      const data = await response.json();
+      setPartRequests(data);
+    } catch (err) {
+      console.error("Failed to fetch part requests", err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeSection === 'requests') fetchRequests();
+    if (activeSection === 'part-requests') fetchPartRequests();
+  }, [activeSection]);
 
   const fetchStats = async () => {
     try {
@@ -871,37 +1116,10 @@ function AdminDashboard() {
         </div>
 
         <nav className="flex-1 space-y-2">
-          <button
-            onClick={() => setActiveSection('dashboard')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeSection === 'dashboard'
-              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-              : 'text-neutral-400 hover:bg-neutral-900'
-              }`}
-          >
-            <LayoutDashboard size={20} />
-            <span className="font-semibold">Dashboard</span>
-          </button>
-          <button
-            onClick={() => setActiveSection('products')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeSection === 'products'
-              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-              : 'text-neutral-400 hover:bg-neutral-900'
-              }`}
-          >
-            <ShoppingBag size={20} />
-            <span className="font-semibold">Manage Products</span>
-          </button>
-
-          <button
-            onClick={() => setActiveSection('requests')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeSection === 'requests'
-              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-              : 'text-neutral-400 hover:bg-neutral-900'
-              }`}
-          >
-            <MessageCircle size={20} />
-            <span className="font-semibold">Requests</span>
-          </button>
+          <NavButton active={activeSection === 'dashboard'} onClick={() => setActiveSection('dashboard')} icon={<LayoutDashboard size={20} />} label="Dashboard" />
+          <NavButton active={activeSection === 'products'} onClick={() => setActiveSection('products')} icon={<ShoppingBag size={20} />} label="Manage Products" />
+          <NavButton active={activeSection === 'requests'} onClick={() => setActiveSection('requests')} icon={<CreditCard size={20} />} label="Purchase Requests" />
+          <NavButton active={activeSection === 'part-requests'} onClick={() => setActiveSection('part-requests')} icon={<Package size={20} />} label="Part Requests" />
         </nav>
 
         <button
@@ -928,20 +1146,26 @@ function AdminDashboard() {
           </Link>
         </div>
 
-        {activeSection === 'dashboard' ? (
-          <OverviewSection products={products} requests={requests} visitorCount={visitorCount} />
-        ) : activeSection === 'products' ? (
+        {activeSection === 'dashboard' && <OverviewSection products={products} requests={requests} visitorCount={visitorCount} />}
+        {activeSection === 'products' && (
           <ManageProductsSection
             products={products}
             onDelete={deleteProduct}
             onSuccess={fetchProducts}
             loading={loading}
           />
-        ) : (
+        )}
+        {activeSection === 'requests' && (
           <RequestsSection
             requests={requests}
             loading={loading}
             onSuccess={fetchRequests}
+          />
+        )}
+        {activeSection === 'part-requests' && (
+          <PartRequestsSection
+            requests={partRequests}
+            onRefresh={fetchPartRequests}
           />
         )}
       </main>

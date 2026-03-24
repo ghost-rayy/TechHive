@@ -74,6 +74,18 @@ async function initializeDb() {
       )
     `);
 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS part_requests (
+        id TEXT PRIMARY KEY,
+        brand TEXT,
+        model TEXT,
+        part TEXT,
+        whatsapp TEXT,
+        status TEXT DEFAULT 'pending',
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     console.log('Connected and initialized PostgreSQL database');
   } catch (err) {
     console.error('Error initializing database', err);
@@ -251,6 +263,54 @@ app.patch('/api/requests/:id', async (req, res) => {
   try {
     await pool.query("UPDATE requests SET status = $1 WHERE id = $2", [status, id]);
     res.json({ message: 'Request updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- Part Requests Endpoints ---
+
+app.get('/api/part-requests', async (req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT * FROM part_requests ORDER BY createdAt DESC");
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/part-requests', async (req, res) => {
+  const { brand, model, part, whatsapp } = req.body;
+  const id = 'PRQ' + Date.now().toString();
+  
+  try {
+    await pool.query(
+      "INSERT INTO part_requests (id, brand, model, part, whatsapp) VALUES ($1, $2, $3, $4, $5)",
+      [id, brand, model, part, whatsapp]
+    );
+    res.status(201).json({ message: 'Part request submitted successfully', id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/part-requests/:id', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  
+  try {
+    await pool.query("UPDATE part_requests SET status = $1 WHERE id = $2", [status, id]);
+    res.json({ message: 'Part request updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/part-requests/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query("DELETE FROM part_requests WHERE id = $1", [id]);
+    res.json({ message: 'Part request deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
