@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Product, PurchaseRequest } from './types';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000'
@@ -29,12 +30,15 @@ interface CartItem extends Product {
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<StoreFront />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-      </Routes>
-    </Router>
+    <>
+      <Router>
+        <Routes>
+          <Route path="/" element={<StoreFront />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Routes>
+      </Router>
+      <Analytics />
+    </>
   );
 }
 
