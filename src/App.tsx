@@ -8,6 +8,7 @@ import { Product, PurchaseRequest } from './types';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000'
@@ -38,6 +39,7 @@ export default function App() {
         </Routes>
       </Router>
       <Analytics />
+      <SpeedInsights />
     </>
   );
 }
