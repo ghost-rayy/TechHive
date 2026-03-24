@@ -234,7 +234,7 @@ function StoreFront() {
 
       <main className="pt-20 pb-20">
         <AnimatePresence mode="wait">
-          {activeTab === 'home' && <HeroSection onExplore={() => setActiveTab('gaming')} />}
+          {activeTab === 'home' && !searchQuery && <HeroSection onExplore={() => setActiveTab('gaming')} />}
 
           {activeTab === 'cart' ? (
             <CartView
