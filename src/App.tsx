@@ -994,17 +994,24 @@ function PartRequestsSection({ requests, onRefresh }: { requests: any[]; onRefre
   );
 }
 
-function NavButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+function NavButton({ active, onClick, icon, label, badge }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string; badge?: number }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all relative group ${active
         ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
         : 'text-neutral-400 hover:bg-neutral-900'
         }`}
     >
       {icon}
       <span className="font-semibold">{label}</span>
+      {badge !== undefined && badge > 0 && (
+        <span className={`ml-auto px-2 py-0.5 text-[10px] font-black rounded-full ${
+          active ? 'bg-white text-indigo-600' : 'bg-indigo-600 text-white'
+        }`}>
+          {badge}
+        </span>
+      )}
     </button>
   );
 }
@@ -1044,6 +1051,9 @@ function AdminDashboard() {
     if (activeSection === 'part-requests') fetchPartRequests();
   }, [activeSection]);
 
+  const pendingPurchaseCount = useMemo(() => requests.filter(r => r.status === 'pending').length, [requests]);
+  const pendingPartCount = useMemo(() => partRequests.filter(r => r.status === 'pending').length, [partRequests]);
+
   const fetchStats = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/stats/summary`);
@@ -1060,7 +1070,7 @@ function AdminDashboard() {
       // Record visit
       fetch(`${API_BASE_URL}/api/visit`, { method: 'POST' }).catch(() => {});
       
-      await Promise.all([fetchProducts(), fetchRequests(), fetchStats()]);
+      await Promise.all([fetchProducts(), fetchRequests(), fetchPartRequests(), fetchStats()]);
       setLoading(false);
     };
     loadData();
@@ -1118,8 +1128,8 @@ function AdminDashboard() {
         <nav className="flex-1 space-y-2">
           <NavButton active={activeSection === 'dashboard'} onClick={() => setActiveSection('dashboard')} icon={<LayoutDashboard size={20} />} label="Dashboard" />
           <NavButton active={activeSection === 'products'} onClick={() => setActiveSection('products')} icon={<ShoppingBag size={20} />} label="Manage Products" />
-          <NavButton active={activeSection === 'requests'} onClick={() => setActiveSection('requests')} icon={<CreditCard size={20} />} label="Purchase Requests" />
-          <NavButton active={activeSection === 'part-requests'} onClick={() => setActiveSection('part-requests')} icon={<Package size={20} />} label="Part Requests" />
+          <NavButton active={activeSection === 'requests'} onClick={() => setActiveSection('requests')} icon={<CreditCard size={20} />} badge={pendingPurchaseCount} label="Purchase Requests" />
+          <NavButton active={activeSection === 'part-requests'} onClick={() => setActiveSection('part-requests')} icon={<Package size={20} />} badge={pendingPartCount} label="Part Requests" />
         </nav>
 
         <button
