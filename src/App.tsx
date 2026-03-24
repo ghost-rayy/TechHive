@@ -27,6 +27,15 @@ interface CartItem extends Product {
   quantity: number;
 }
 
+const getVisitorId = () => {
+  let id = localStorage.getItem('techhive_visitor_id');
+  if (!id) {
+    id = 'visitor_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    localStorage.setItem('techhive_visitor_id', id);
+  }
+  return id;
+};
+
 export default function App() {
   return (
     <Router>
@@ -41,7 +50,14 @@ export default function App() {
 function StoreFront() {
   useEffect(() => {
     // Record unique visitor
-    fetch(`${API_BASE_URL}/api/visit`, { method: 'POST' }).catch(() => { });
+    fetch(`${API_BASE_URL}/api/visit`, { 
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        visitorId: getVisitorId(),
+        userAgent: navigator.userAgent
+      })
+    }).catch(() => { });
   }, []);
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -1078,7 +1094,14 @@ function AdminDashboard() {
     const loadData = async () => {
       setLoading(true);
       // Record visit
-      fetch(`${API_BASE_URL}/api/visit`, { method: 'POST' }).catch(() => {});
+      fetch(`${API_BASE_URL}/api/visit`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          visitorId: getVisitorId(),
+          userAgent: navigator.userAgent
+        })
+      }).catch(() => {});
       
       await Promise.all([fetchProducts(), fetchRequests(), fetchPartRequests(), fetchStats()]);
       setLoading(false);

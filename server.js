@@ -71,7 +71,9 @@ async function initializeDb() {
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS visitors (
-        ip TEXT PRIMARY KEY,
+        id TEXT PRIMARY KEY,
+        ip TEXT,
+        user_agent TEXT,
         lastVisit TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -331,12 +333,21 @@ app.delete('/api/requests/:id', async (req, res) => {
 // --- Stats & Visitors Endpoints ---
 
 app.post('/api/visit', async (req, res) => {
+  const { visitorId, userAgent } = req.body;
   const ip = req.ip;
+
+  if (!visitorId) return res.status(400).json({ error: 'visitorId is required' });
+
+  // Basic bot filtering
+  const botKeywords = ['bot', 'crawler', 'spider', 'criteo', 'lighthouse', 'headless'];
+  const isBot = userAgent && botKeywords.some(keyword => userAgent.toLowerCase().includes(keyword));
   
+  if (isBot) return res.status(200).json({ message: 'Bot visit ignored' });
+
   try {
     await pool.query(
-      "INSERT INTO visitors (ip, \"lastvisit\") VALUES ($1, CURRENT_TIMESTAMP) ON CONFLICT (ip) DO UPDATE SET \"lastvisit\" = CURRENT_TIMESTAMP",
-      [ip]
+      "INSERT INTO visitors (id, ip, user_agent, \"lastvisit\") VALUES ($1, $2, $3, CURRENT_TIMESTAMP) ON CONFLICT (id) DO UPDATE SET \"lastvisit\" = CURRENT_TIMESTAMP, ip = $2, user_agent = $3",
+      [visitorId, ip, userAgent]
     );
     res.status(200).json({ message: 'Visit recorded' });
   } catch (err) {
