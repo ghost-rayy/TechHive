@@ -1064,6 +1064,16 @@ function AdminDashboard() {
     }
   };
 
+  const resetVisitorCount = async () => {
+    if (!confirm("Are you sure you want to reset the visitor count? This cannot be undone.")) return;
+    try {
+      await fetch(`${API_BASE_URL}/api/stats/visitors`, { method: 'DELETE' });
+      fetchStats();
+    } catch (err) {
+      console.error('Failed to reset visitor count');
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -1156,7 +1166,14 @@ function AdminDashboard() {
           </Link>
         </div>
 
-        {activeSection === 'dashboard' && <OverviewSection products={products} requests={requests} visitorCount={visitorCount} />}
+        {activeSection === 'dashboard' && (
+          <OverviewSection 
+            products={products} 
+            requests={requests} 
+            visitorCount={visitorCount} 
+            onResetVisitors={resetVisitorCount}
+          />
+        )}
         {activeSection === 'products' && (
           <ManageProductsSection
             products={products}
@@ -1183,7 +1200,12 @@ function AdminDashboard() {
   );
 }
 
-function OverviewSection({ products, requests, visitorCount }: { products: Product[]; requests: PurchaseRequest[]; visitorCount: number }) {
+function OverviewSection({ products, requests, visitorCount, onResetVisitors }: { 
+  products: Product[]; 
+  requests: PurchaseRequest[]; 
+  visitorCount: number;
+  onResetVisitors: () => void;
+}) {
   const totalRevenue = useMemo(() => requests.filter(r => r.status === 'completed').reduce((acc, r) => acc + r.total, 0), [requests]);
   const newRequests = useMemo(() => requests.filter(r => r.status === 'pending').length, [requests]);
 
@@ -1209,9 +1231,20 @@ function OverviewSection({ products, requests, visitorCount }: { products: Produ
               <div className="p-3 bg-neutral-800 rounded-2xl group-hover:scale-110 transition-transform">
                 {stat.icon}
               </div>
-              <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${i === 1 ? 'bg-indigo-500/10 text-indigo-400' : 'bg-green-500/10 text-green-400'}`}>
-                {stat.change}
-              </span>
+              <div className="flex flex-col items-end gap-2">
+                <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${i === 1 ? 'bg-indigo-500/10 text-indigo-400' : 'bg-green-500/10 text-green-400'}`}>
+                  {stat.change}
+                </span>
+                {i === 0 && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onResetVisitors(); }}
+                    className="p-1.5 bg-neutral-800 hover:bg-red-500/20 text-neutral-500 hover:text-red-400 rounded-lg transition-all"
+                    title="Reset Visitor Count"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                )}
+              </div>
             </div>
             <div>
               <p className="text-neutral-500 text-xs font-bold uppercase tracking-widest mb-1">{stat.label}</p>

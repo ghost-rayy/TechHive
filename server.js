@@ -329,13 +329,24 @@ app.delete('/api/requests/:id', async (req, res) => {
 // --- Stats & Visitors Endpoints ---
 
 app.post('/api/visit', async (req, res) => {
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const forwarded = req.headers['x-forwarded-for'];
+  const ip = typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : req.socket.remoteAddress;
+  
   try {
     await pool.query(
       "INSERT INTO visitors (ip, \"lastvisit\") VALUES ($1, CURRENT_TIMESTAMP) ON CONFLICT (ip) DO UPDATE SET \"lastvisit\" = CURRENT_TIMESTAMP",
       [ip]
     );
     res.status(200).json({ message: 'Visit recorded' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/stats/visitors', async (req, res) => {
+  try {
+    await pool.query("DELETE FROM visitors");
+    res.json({ message: 'Visitor count reset successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
