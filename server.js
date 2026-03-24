@@ -14,6 +14,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.set('trust proxy', true);
+
 // Cloudinary Configuration
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -329,8 +331,7 @@ app.delete('/api/requests/:id', async (req, res) => {
 // --- Stats & Visitors Endpoints ---
 
 app.post('/api/visit', async (req, res) => {
-  const forwarded = req.headers['x-forwarded-for'];
-  const ip = typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : req.socket.remoteAddress;
+  const ip = req.ip;
   
   try {
     await pool.query(
