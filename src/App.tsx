@@ -1,7 +1,7 @@
 import {
   ShoppingCart, Star, Plus, Minus, X, ArrowRight, Gamepad2, Briefcase, Tag,
   Sparkles, ShoppingBag, CreditCard, ChevronRight, MessageCircle, Trash2,
-  LayoutDashboard, PlusCircle, Package, Mail, Phone, Menu, ChevronLeft, Search
+  LayoutDashboard, PlusCircle, Package, Mail, Phone, Menu, ChevronLeft, Search, SlidersHorizontal
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product, PurchaseRequest } from './types';
@@ -9,6 +9,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import InstallPwaModal from './components/InstallPwaModal';
 import PwaRefreshButton from './components/PwaRefreshButton';
+import PriceFilter from './components/PriceFilter';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000'
@@ -72,6 +73,7 @@ function StoreFront() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isPartRequestOpen, setIsPartRequestOpen] = useState(false);
+  const [priceRange, setPriceRange] = useState<[number, number] | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -126,21 +128,28 @@ function StoreFront() {
       );
     }
 
-    // Category filter (ignored if searching for a global experience, or we can keep it)
-    // Actually, user said "beside the card icon", usually implying it's a general search.
-    // I'll make it so if searchQuery exists, we ignore the activeTab category filter
-    // unless the user specifically wants to search WITHIN a category.
-    // Let's decide: Global search is usually better.
-    if (searchQuery) return result;
+    // Category filter
+    if (!searchQuery) {
+      if (activeTab === 'cheap-deals') {
+        result = result.filter(p => p.category === 'budget' || p.category === 'low-cost' || p.price < 3000);
+      } else if (activeTab === 'low-cost') {
+        result = result.filter(p => p.category === 'low-cost');
+      } else if (activeTab === 'budget') {
+        result = result.filter(p => p.category === 'budget');
+      } else if (activeTab === 'casual') {
+        result = result.filter(p => p.category === 'casual');
+      } else if (activeTab === 'gaming') {
+        result = result.filter(p => p.category === 'gaming');
+      }
+    }
 
-    if (activeTab === 'home' || activeTab === 'cart') return result;
-    if (activeTab === 'cheap-deals') return result.filter(p => p.category === 'budget' || p.category === 'low-cost' || p.price < 3000);
-    if (activeTab === 'low-cost') return result.filter(p => p.category === 'low-cost');
-    if (activeTab === 'budget') return result.filter(p => p.category === 'budget');
-    if (activeTab === 'casual') return result.filter(p => p.category === 'casual');
-    if (activeTab === 'gaming') return result.filter(p => p.category === 'gaming');
+    // Price range filter
+    if (priceRange) {
+      result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+    }
+
     return result;
-  }, [activeTab, products, searchQuery]);
+  }, [activeTab, products, searchQuery, priceRange]);
 
   if (loading) {
     return (
@@ -283,6 +292,11 @@ function StoreFront() {
                   </p>
                 </div>
               </div>
+
+              <PriceFilter 
+                currentRange={priceRange}
+                onRangeSelect={setPriceRange}
+              />
               {filteredProducts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 bg-neutral-900/30 border border-neutral-800/80 rounded-[3rem] text-center w-full">
                   <div className="w-20 h-20 bg-neutral-900 rounded-3xl flex items-center justify-center mb-8 text-neutral-700 shadow-xl border border-neutral-800">
