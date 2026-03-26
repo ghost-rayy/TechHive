@@ -437,7 +437,18 @@ function HeroSection({ onExplore, onRequestPart }: { onExplore: () => void; onRe
         </button>
       </div>
 
-      
+      <div className="mt-20 relative rounded-3xl overflow-hidden border border-neutral-800 aspect-[21/9] group">
+        <img
+          src="/hero_2026.png"
+          alt="Hero"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+        />
+        {/* <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-transparent" /> */}
+        <div className="absolute bottom-10 left-10 text-left">
+          <p className="text-indigo-400 font-bold mb-2">LIMITED EDITION</p>
+          <h3 className="text-3xl font-bold uppercase tracking-tight">Tech-Hive Ghana 2026</h3>
+        </div>
+      </div>
     </motion.section>
   );
 }
