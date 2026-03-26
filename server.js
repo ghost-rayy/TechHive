@@ -117,7 +117,7 @@ app.get('/api/products', async (req, res) => {
         price: parseFloat(row.price),
         specs: parsedSpecs,
         isNew: !!row.isnew,
-        image: row.image || 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=800&auto=format&fit=crop',
+        image: row.image || '',
         rating: parseFloat(row.rating || 4.5)
       };
     });
