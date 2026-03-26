@@ -375,6 +375,28 @@ app.get('/api/stats/summary', async (req, res) => {
   }
 });
 
+// Serve static files from the 'dist' directory
+app.use(express.static(path.join(__dirname, 'dist'), {
+  setHeaders: (res, path) => {
+    // Assets (js, css, images) can be cached for longer if they have hashes
+    // but index.html MUST never be cached
+    if (path.endsWith('index.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+  }
+}));
+
+// Fallback for SPA routing - serve index.html with no-cache headers
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'), {
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    }
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
