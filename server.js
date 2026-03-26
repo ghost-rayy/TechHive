@@ -113,7 +113,11 @@ app.get('/api/products', async (req, res) => {
     const products = rows.map(row => {
       let parsedSpecs = [];
       try {
-        parsedSpecs = row.specs ? (row.specs.startsWith('[') ? JSON.parse(row.specs) : row.specs.split(',').map(s => s.trim())) : [];
+        if (Array.isArray(row.specs)) {
+          parsedSpecs = row.specs;
+        } else if (typeof row.specs === 'string') {
+          parsedSpecs = row.specs.startsWith('[') ? JSON.parse(row.specs) : row.specs.split(',').map(s => s.trim());
+        }
       } catch (e) {
         console.error("Failed to parse specs for product", row.id, row.specs);
       }
