@@ -1,0 +1,22 @@
+{
+  "name": "TechHive | Premium Laptops",
+  "short_name": "TechHive",
+  "description": "Premium laptops and accessories curated for performance, style, and value.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#8b5cf6",
+  "icons": [
+    {
+      "src": "/logo3.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo3.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

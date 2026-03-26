@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Product, PurchaseRequest } from './types';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import InstallPwaModal from './components/InstallPwaModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000'
@@ -383,6 +384,9 @@ function StoreFront() {
           Questions? Chat with us
         </span>
       </a>
+
+      {/* PWA Install Modal */}
+      <InstallPwaModal />
     </div>
   );
 }
