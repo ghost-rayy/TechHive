@@ -8,7 +8,7 @@ import { Product, PurchaseRequest } from './types';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import InstallPwaModal from './components/InstallPwaModal';
-import PullToRefresh from './components/PullToRefresh';
+import PwaRefreshButton from './components/PwaRefreshButton';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000'
@@ -151,8 +151,8 @@ function StoreFront() {
   }
 
   return (
-    <PullToRefresh>
-      <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans selection:bg-indigo-500/30">
+  return (
+    <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans selection:bg-indigo-500/30">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800">
         <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between relative">
@@ -387,10 +387,10 @@ function StoreFront() {
         </span>
       </a>
 
-      {/* PWA Install Modal */}
+      {/* PWA Components */}
       <InstallPwaModal />
+      <PwaRefreshButton />
     </div>
-    </PullToRefresh>
   );
 }
 
