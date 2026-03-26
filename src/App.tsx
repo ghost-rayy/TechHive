@@ -9,7 +9,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import InstallPwaModal from './components/InstallPwaModal';
 import PwaRefreshButton from './components/PwaRefreshButton';
-import PriceFilter from './components/PriceFilter';
+import PriceFilterModal from './components/PriceFilterModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000'
@@ -74,7 +74,7 @@ function StoreFront() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isPartRequestOpen, setIsPartRequestOpen] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number] | null>(null);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isPriceFilterModalOpen, setIsPriceFilterModalOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -222,15 +222,15 @@ function StoreFront() {
             </div>
 
             <button
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              onClick={() => setIsPriceFilterModalOpen(true)}
               className={`p-3 border rounded-xl transition-all group ${
-                isFilterOpen || priceRange 
+                priceRange 
                   ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' 
                   : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:border-indigo-500/50'
               }`}
-              aria-label="Toggle Filters"
+              aria-label="Open Filters"
             >
-              <SlidersHorizontal size={20} className={isFilterOpen || priceRange ? 'text-white' : 'text-neutral-400 group-hover:text-indigo-400'} />
+              <SlidersHorizontal size={20} className={priceRange ? 'text-white' : 'text-neutral-400 group-hover:text-indigo-400'} />
             </button>
 
             <button
@@ -307,18 +307,15 @@ function StoreFront() {
               </div>
 
               <AnimatePresence>
-                {(isFilterOpen || priceRange) && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <PriceFilter 
-                      currentRange={priceRange}
-                      onRangeSelect={setPriceRange}
-                    />
-                  </motion.div>
+                {isPriceFilterModalOpen && (
+                  <PriceFilterModal 
+                    currentRange={priceRange}
+                    onRangeSelect={(range: [number, number] | null) => {
+                      setPriceRange(range);
+                      setIsPriceFilterModalOpen(false);
+                    }}
+                    onClose={() => setIsPriceFilterModalOpen(false)}
+                  />
                 )}
               </AnimatePresence>
               {filteredProducts.length === 0 ? (
