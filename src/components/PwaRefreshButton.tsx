@@ -36,11 +36,12 @@ const PwaRefreshButton: React.FC = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={handleRefresh}
-        className="fixed top-24 right-4 z-[90] p-3 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-full shadow-lg shadow-violet-600/10 text-zinc-400 hover:text-white transition-colors group"
+        className="fixed bottom-28 right-8 z-[100] p-4 bg-neutral-900/90 backdrop-blur-md border border-neutral-800 rounded-full shadow-[0_0_30px_rgba(0,0,0,0.3)] text-neutral-400 hover:text-white hover:border-indigo-500/50 transition-all active:scale-95 group"
         aria-label="Refresh Page"
       >
         <RefreshCcw 
-          className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} 
+          size={24}
+          className={`${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`} 
         />
       </motion.button>
     </AnimatePresence>
