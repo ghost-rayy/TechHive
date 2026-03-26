@@ -1,7 +1,8 @@
 import {
   ShoppingCart, Star, Plus, Minus, X, ArrowRight, Gamepad2, Briefcase, Tag,
   Sparkles, ShoppingBag, CreditCard, ChevronRight, MessageCircle, Trash2,
-  LayoutDashboard, PlusCircle, Package, Mail, Phone, Menu, ChevronLeft, Search, SlidersHorizontal
+  LayoutDashboard, PlusCircle, Package, Mail, Phone, Menu, ChevronLeft, Search, SlidersHorizontal,
+  ShieldCheck, Instagram, Facebook, Twitter, MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product, PurchaseRequest } from './types';
@@ -403,8 +404,94 @@ function StoreFront() {
         )}
       </AnimatePresence>
 
-      <footer className="bg-neutral-900/50 border-t border-neutral-800 py-12 px-4">
-        {/* ... (footer content remains unchanged) */}
+      <footer className="bg-neutral-950 border-t border-neutral-800 pt-20 pb-10 px-4 relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
+        
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+          {/* Brand Info */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 group cursor-pointer" onClick={() => setActiveTab('home')}>
+              <div className="w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <img src="/logo3.png" alt="TechHive" className="w-full h-full object-contain" />
+              </div>
+              <span className="text-2xl font-black tracking-tighter">Tech<span className="text-indigo-500">Hive</span></span>
+            </div>
+            <p className="text-neutral-400 text-sm leading-relaxed max-w-xs">
+              Elevate your digital life with premium performance laptops and tech accessories. Curated for the best in Ghana.
+            </p>
+            <div className="flex items-center gap-3 py-2 px-4 bg-neutral-900/50 border border-neutral-800 rounded-full w-fit">
+              <ShieldCheck size={16} className="text-green-500" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-300">Safe | Smart | Secure</span>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">Categories</h4>
+            <ul className="space-y-4">
+              <li><button onClick={() => setActiveTab('gaming')} className="text-neutral-400 hover:text-indigo-400 transition-colors text-sm font-medium">Gaming Laptops</button></li>
+              <li><button onClick={() => setActiveTab('casual')} className="text-neutral-400 hover:text-indigo-400 transition-colors text-sm font-medium">Professional Gear</button></li>
+              <li><button onClick={() => setActiveTab('cheap-deals')} className="text-neutral-400 hover:text-indigo-400 transition-colors text-sm font-medium">Budget Deals</button></li>
+              <li><button onClick={() => setIsPartRequestOpen(true)} className="text-neutral-400 hover:text-indigo-400 transition-colors text-sm font-medium">Laptop Parts</button></li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">Connect</h4>
+            <ul className="space-y-4">
+              <li className="flex items-center gap-3 text-neutral-400">
+                <div className="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-indigo-400">
+                  <Phone size={16} />
+                </div>
+                <span className="text-sm">053 721 2755</span>
+              </li>
+              <li className="flex items-center gap-3 text-neutral-400">
+                <div className="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-green-500">
+                  <MessageCircle size={16} />
+                </div>
+                <a href="https://wa.me/233537212755" target="_blank" rel="noreferrer" className="text-sm hover:text-white transition-colors">WhatsApp Chat</a>
+              </li>
+              <li className="flex items-center gap-3 text-neutral-400">
+                <div className="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-indigo-400">
+                  <MapPin size={16} />
+                </div>
+                <span className="text-sm">Accra, Ghana</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Newsletter / Professional Touch */}
+          <div>
+            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">Stay Updated</h4>
+            <div className="relative group">
+              <input 
+                type="email" 
+                placeholder="Enter email..." 
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-sm focus:ring-2 ring-indigo-500/50 outline-none transition-all"
+              />
+              <button className="absolute right-2 top-2 p-1.5 bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all">
+                <ArrowRight size={18} />
+              </button>
+            </div>
+            <div className="flex gap-4 mt-8">
+              <a href="#" className="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center text-neutral-400 hover:bg-indigo-600 hover:text-white transition-all"><Instagram size={18} /></a>
+              <a href="#" className="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center text-neutral-400 hover:bg-indigo-600 hover:text-white transition-all"><Facebook size={18} /></a>
+              <a href="#" className="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center text-neutral-400 hover:bg-indigo-600 hover:text-white transition-all"><Twitter size={18} /></a>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto pt-8 border-t border-neutral-800/50 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-neutral-500 font-medium">
+          <p>© {new Date().getFullYear()} TechHive Ghana. All rights reserved.</p>
+          <div className="flex items-center gap-8">
+            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <span className="flex items-center gap-1.5">
+              Made with <Sparkles size={12} className="text-yellow-500" /> in Accra
+            </span>
+          </div>
+        </div>
       </footer>
 
       {/* Floating WhatsApp Button */}
