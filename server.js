@@ -393,8 +393,11 @@ app.use(express.static(path.join(__dirname, 'dist'), {
 }));
 
 // Fallback for SPA routing - serve index.html with no-cache headers
-// Note: In Express 5, the wildcard requires a named parameter like '/:path(.*)'
-app.get('/:path(.*)', (req, res) => {
+// Using app.use() without a path to act as a robust catch-all for GET requests
+app.use((req, res, next) => {
+  // Only handle GET requests that aren't already handled by API or static files
+  if (req.method !== 'GET') return next();
+
   const indexPath = path.join(__dirname, 'dist', 'index.html');
   res.sendFile(indexPath, {
     headers: {
@@ -404,8 +407,8 @@ app.get('/:path(.*)', (req, res) => {
     }
   }, (err) => {
     if (err && !res.headersSent) {
-      // If index.html is missing (e.g. build failed), return a simple message
-      res.status(404).send('Application not found. Please ensure the project is built.');
+      // If index.html is missing (e.g. build failed), just pass to the next handler/error
+      next();
     }
   });
 });
