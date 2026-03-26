@@ -444,9 +444,9 @@ function HeroSection({ onExplore, onRequestPart }: { onExplore: () => void; onRe
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-transparent" />
-        <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-left">
-          <p className="text-indigo-400 text-xs md:text-base font-bold mb-1 md:mb-2">LIMITED EDITION</p>
-          <h3 className="text-xl md:text-3xl font-bold uppercase tracking-tight">Tech-Hive Ghana 2026</h3>
+        <div className="absolute bottom-4 left-4 md:bottom-10 md:left-10 text-left">
+          <p className="text-indigo-400 text-[10px] md:text-sm font-black mb-1 md:mb-2 tracking-widest uppercase">Limited Edition</p>
+          <h3 className="text-lg md:text-4xl font-black uppercase tracking-tighter">Tech-Hive Ghana 2026</h3>
         </div>
       </div>
     </motion.section>
