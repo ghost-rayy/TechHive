@@ -383,10 +383,10 @@ app.get('/api/stats/summary', async (req, res) => {
 
 // Serve static files from the 'dist' directory
 app.use(express.static(path.join(__dirname, 'dist'), {
-  setHeaders: (res, path) => {
+  setHeaders: (res, filePath) => {
     // Assets (js, css, images) can be cached for longer if they have hashes
     // but index.html MUST never be cached
-    if (path.endsWith('index.html')) {
+    if (filePath.endsWith('index.html')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
   }
@@ -394,11 +394,17 @@ app.use(express.static(path.join(__dirname, 'dist'), {
 
 // Fallback for SPA routing - serve index.html with no-cache headers
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'), {
+  const indexPath = path.join(__dirname, 'dist', 'index.html');
+  res.sendFile(indexPath, {
     headers: {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
       'Expires': '0'
+    }
+  }, (err) => {
+    if (err && !res.headersSent) {
+      // If index.html is missing (e.g. build failed), return a simple message
+      res.status(404).send('Application not found. Please ensure the project is built.');
     }
   });
 });
