@@ -24,6 +24,10 @@ cloudinary.config({
 });
 
 // PostgreSQL Configuration
+if (!process.env.DATABASE_URL) {
+  console.error('CRITICAL: DATABASE_URL is not defined in environment variables');
+}
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -105,6 +109,7 @@ const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
 app.get('/api/products', async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM products");
+    console.log(`Fetched ${rows.length} products from database`);
     const products = rows.map(row => {
       let parsedSpecs = [];
       try {
@@ -123,6 +128,7 @@ app.get('/api/products', async (req, res) => {
     });
     res.json(products);
   } catch (err) {
+    console.error("Error fetching products:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
