@@ -1,81 +1,116 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
 const PullToRefresh: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isStandalone, setIsStandalone] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const pullThreshold = 80;
-  const constraintsRef = useRef<HTMLDivElement>(null);
-  const controls = useAnimation();
-  const y = useMotionValue(0);
+  const [pullDistance, setPullDistance] = useState(0);
   
-  // Transform y value into rotation for the icon
-  const rotate = useTransform(y, [0, pullThreshold], [0, 360]);
-  const opacity = useTransform(y, [0, 20, pullThreshold], [0, 0.5, 1]);
-  const scale = useTransform(y, [0, pullThreshold], [0.8, 1.1]);
+  const pullThreshold = 90;
+  const maxPull = 150;
+  const startY = useRef(0);
+  const isPulling = useRef(false);
+  const controls = useAnimation();
 
   useEffect(() => {
-    // Only enable if in standalone mode (PWA)
     const checkStandalone = () => {
       setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone);
     };
     checkStandalone();
-    
-    // Also listen for changes (though rare for a current session)
     const mediaQuery = window.matchMedia('(display-mode: standalone)');
     mediaQuery.addEventListener('change', checkStandalone);
     return () => mediaQuery.removeEventListener('change', checkStandalone);
   }, []);
 
-  const handleDragStart = () => {
-    // If not at the very top, cancel the drag by setting constraints
-    if (window.scrollY > 0) {
-      controls.stop();
-      controls.start({ y: 0 });
-    }
-  };
+  useEffect(() => {
+    if (!isStandalone || isRefreshing) return;
 
-  const handleDragEnd = async (_: any, info: any) => {
-    // Only refresh if we were at the top when started and pulled enough
-    if (window.scrollY <= 5 && info.offset.y > pullThreshold && !isRefreshing) {
-      setIsRefreshing(true);
-      await controls.start({ y: 60 });
-      window.location.reload();
-    } else {
-      controls.start({ y: 0 });
-    }
-  };
+    const handleTouchStart = (e: TouchEvent) => {
+      // Only start pulling if at the very top
+      if (window.scrollY <= 5) {
+        startY.current = e.touches[0].pageY;
+        isPulling.current = true;
+      } else {
+        isPulling.current = false;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isPulling.current) return;
+
+      const currentY = e.touches[0].pageY;
+      const diff = currentY - startY.current;
+
+      if (diff > 0) {
+        // We are pulling down at the top
+        // Prevent default only if we have actually started a "pull" to avoid blocking normal scroll intent
+        const resistedDiff = Math.min(diff * 0.4, maxPull);
+        setPullDistance(resistedDiff);
+        
+        if (resistedDiff > 10) {
+           if (e.cancelable) e.preventDefault();
+        }
+      } else {
+        // Pulling up, let normal scroll happen
+        isPulling.current = false;
+        setPullDistance(0);
+      }
+    };
+
+    const handleTouchEnd = () => {
+      if (!isPulling.current) return;
+      isPulling.current = false;
+
+      if (pullDistance >= pullThreshold) {
+        setIsRefreshing(true);
+        setPullDistance(60);
+        window.location.reload();
+      } else {
+        setPullDistance(0);
+      }
+    };
+
+    window.addEventListener('touchstart', handleTouchStart, { passive: false });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isStandalone, isRefreshing, pullDistance]);
 
   // If not in PWA standalone mode, just return children
   if (!isStandalone) return <>{children}</>;
 
   return (
-    <div className="relative overflow-hidden min-h-screen bg-black" ref={constraintsRef}>
-      {/* Loading Indicator Overlay */}
+    <div className="relative min-h-screen bg-black overflow-x-hidden">
+      {/* Loading Indicator */}
       <motion.div
-        style={{ y, opacity, scale, rotate }}
-        animate={controls}
+        initial={false}
+        animate={{ 
+          y: pullDistance,
+          opacity: pullDistance > 20 ? 1 : 0,
+          scale: pullDistance > 20 ? 1 : 0.8,
+          rotate: pullDistance * 2
+        }}
+        transition={isPulling.current ? { type: 'tween', duration: 0 } : { type: 'spring', stiffness: 300, damping: 30 }}
         className="absolute top-0 left-0 right-0 z-[100] flex justify-center py-4 pointer-events-none"
       >
-        <div className="bg-zinc-800/80 backdrop-blur-md border border-zinc-700 p-3 rounded-full shadow-xl shadow-violet-600/20">
+        <div className="bg-zinc-800/90 backdrop-blur-md border border-zinc-700 p-3 rounded-full shadow-2xl shadow-violet-600/30">
           <Loader2 
-            className={`text-violet-400 ${isRefreshing ? 'animate-spin' : ''}`} 
+            className={`text-violet-400 ${isRefreshing || pullDistance >= pullThreshold ? 'animate-spin' : ''}`} 
             size={24} 
           />
         </div>
       </motion.div>
 
-      {/* Draggable Wrapper */}
+      {/* Main Content (Natural scroll) */}
       <motion.div
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 400 }}
-        dragElastic={0.6}
-        style={{ y }}
-        animate={controls}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        className="relative z-10 touch-pan-down"
+        animate={{ y: pullDistance * 0.5 }}
+        transition={isPulling.current ? { type: 'tween', duration: 0 } : { type: 'spring', stiffness: 300, damping: 30 }}
       >
         {children}
       </motion.div>
