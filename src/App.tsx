@@ -74,6 +74,7 @@ function StoreFront() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isPartRequestOpen, setIsPartRequestOpen] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number] | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -221,6 +222,18 @@ function StoreFront() {
             </div>
 
             <button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className={`p-3 border rounded-xl transition-all group ${
+                isFilterOpen || priceRange 
+                  ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' 
+                  : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:border-indigo-500/50'
+              }`}
+              aria-label="Toggle Filters"
+            >
+              <SlidersHorizontal size={20} className={isFilterOpen || priceRange ? 'text-white' : 'text-neutral-400 group-hover:text-indigo-400'} />
+            </button>
+
+            <button
               onClick={() => setActiveTab('cart')}
               className="relative p-3 bg-neutral-900 border border-neutral-800 rounded-xl hover:border-indigo-500/50 transition-all group"
             >
@@ -293,10 +306,21 @@ function StoreFront() {
                 </div>
               </div>
 
-              <PriceFilter 
-                currentRange={priceRange}
-                onRangeSelect={setPriceRange}
-              />
+              <AnimatePresence>
+                {(isFilterOpen || priceRange) && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <PriceFilter 
+                      currentRange={priceRange}
+                      onRangeSelect={setPriceRange}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
               {filteredProducts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 bg-neutral-900/30 border border-neutral-800/80 rounded-[3rem] text-center w-full">
                   <div className="w-20 h-20 bg-neutral-900 rounded-3xl flex items-center justify-center mb-8 text-neutral-700 shadow-xl border border-neutral-800">
