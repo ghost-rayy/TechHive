@@ -393,8 +393,8 @@ app.use(express.static(path.join(__dirname, 'dist'), {
 }));
 
 // Fallback for SPA routing - serve index.html with no-cache headers
-// Note: In Express 5, the wildcard '*' is replaced by '/(.*)'
-app.get('/(.*)', (req, res) => {
+// Note: In Express 5, the wildcard requires a named parameter like '/:path(.*)'
+app.get('/:path(.*)', (req, res) => {
   const indexPath = path.join(__dirname, 'dist', 'index.html');
   res.sendFile(indexPath, {
     headers: {
