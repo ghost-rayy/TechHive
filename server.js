@@ -69,6 +69,7 @@ async function initializeDb() {
         items TEXT NOT NULL,
         total NUMERIC NOT NULL,
         status TEXT DEFAULT 'pending',
+        receipt_number TEXT,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -92,6 +93,16 @@ async function initializeDb() {
         status TEXT DEFAULT 'pending',
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `);
+    
+    // Migration: Add receipt_number to requests if it doesn't exist
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='requests' AND column_name='receipt_number') THEN
+          ALTER TABLE requests ADD COLUMN receipt_number TEXT;
+        END IF;
+      END$$;
     `);
 
     console.log('Connected and initialized PostgreSQL database');
@@ -275,8 +286,14 @@ app.patch('/api/requests/:id', async (req, res) => {
   const { status } = req.body;
   
   try {
-    await pool.query("UPDATE requests SET status = $1 WHERE id = $2", [status, id]);
-    res.json({ message: 'Request updated successfully' });
+    if (status === 'completed') {
+      const receiptId = 'THG-' + new Date().getFullYear() + '-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+      await pool.query("UPDATE requests SET status = $1, receipt_number = $2 WHERE id = $3", [status, receiptId, id]);
+      res.json({ message: 'Request updated and receipt generated', receipt_number: receiptId });
+    } else {
+      await pool.query("UPDATE requests SET status = $1 WHERE id = $2", [status, id]);
+      res.json({ message: 'Request updated successfully' });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

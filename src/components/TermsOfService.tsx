@@ -5,8 +5,8 @@ export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-black text-neutral-100 font-sans selection:bg-indigo-500/30 py-20 px-4">
       <div className="max-w-4xl mx-auto">
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className="inline-flex items-center gap-2 text-neutral-400 hover:text-white mb-12 transition-colors group"
         >
           <div className="p-2 bg-neutral-900 rounded-xl group-hover:bg-neutral-800 transition-colors">
@@ -20,7 +20,7 @@ export default function TermsOfService() {
             <Scale size={32} />
           </div>
           <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">Terms of Service</h1>
-          <p className="text-neutral-500 font-medium">Safe | Smart | Secure Trading at TechHive Ghana</p>
+          <p className="text-neutral-500 font-medium">Simple | Smart | Secure Trading at TechHive Ghana</p>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">

@@ -2,7 +2,7 @@ import {
   ShoppingCart, Star, Plus, Minus, X, ArrowRight, Gamepad2, Briefcase, Tag,
   Sparkles, ShoppingBag, CreditCard, ChevronRight, MessageCircle, Trash2,
   LayoutDashboard, PlusCircle, Package, Mail, Phone, Menu, ChevronLeft, Search, SlidersHorizontal,
-  ShieldCheck, Instagram, Facebook, Twitter, MapPin
+  ShieldCheck, Instagram, Facebook, Twitter, MapPin, FileText, Share2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product, PurchaseRequest } from './types';
@@ -13,6 +13,7 @@ import PwaRefreshButton from './components/PwaRefreshButton';
 import PriceFilterModal from './components/PriceFilterModal';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
+import InvoicePage from './components/InvoicePage';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000'
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/receipt/:id" element={<InvoicePage />} />
       </Routes>
     </Router>
   );
@@ -425,7 +427,7 @@ function StoreFront() {
             </p>
             <div className="flex items-center gap-3 py-2 px-4 bg-neutral-900/50 border border-neutral-800 rounded-full w-fit">
               <ShieldCheck size={16} className="text-green-500" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-300">Safe | Smart | Secure</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-300">Simple | Smart | Secure</span>
             </div>
           </div>
 
@@ -1416,7 +1418,7 @@ function OverviewSection({ products, requests, visitorCount, onResetVisitors }: 
           {requests.slice(0, 3).length === 0 ? (
             <p className="text-neutral-500 text-center py-10 italic">No recent order activity found.</p>
           ) : (
-            requests.slice(0, 3).map((request, i) => (
+            requests.slice(0, 3).map((request) => (
               <div key={request.id} className="flex items-center gap-4 bg-neutral-950/50 p-5 rounded-3xl border border-neutral-800/30">
                 <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400">
                   <Package size={20} />
@@ -1837,6 +1839,15 @@ function RequestsSection({ requests, loading, onSuccess }: { requests: PurchaseR
                     >
                       View Details
                     </button>
+                    {request.status === 'completed' && (
+                      <button
+                        onClick={() => window.open(`/#/receipt/${request.id}`, '_blank')}
+                        className="w-12 h-12 flex items-center justify-center bg-indigo-500/10 hover:bg-indigo-600 text-indigo-400 hover:text-white rounded-xl transition-all"
+                        title="View Receipt"
+                      >
+                        <FileText size={18} />
+                      </button>
+                    )}
                     <button
                       onClick={() => deleteRequest(request.id)}
                       className="w-12 h-12 flex items-center justify-center bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition-all"
@@ -1910,9 +1921,18 @@ function RequestsSection({ requests, loading, onSuccess }: { requests: PurchaseR
                     Mark as Fulfilled
                   </button>
                 ) : (
-                  <div className="flex items-center gap-2 text-green-500 bg-green-500/10 px-6 py-3 rounded-2xl font-bold">
-                    <Package size={18} />
-                    <span>Order Fulfilled</span>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2 text-green-500 bg-green-500/10 px-6 py-3 rounded-2xl font-bold">
+                      <Package size={18} />
+                      <span>Order Fulfilled</span>
+                    </div>
+                    <button
+                      onClick={() => window.open(`/#/receipt/${selectedRequest.id}`, '_blank')}
+                      className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold transition-all"
+                    >
+                      <Share2 size={18} />
+                      View/Share Receipt
+                    </button>
                   </div>
                 )}
               </div>
