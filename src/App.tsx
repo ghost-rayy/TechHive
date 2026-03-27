@@ -11,6 +11,8 @@ import { HashRouter as Router, Routes, Route, Link, useNavigate } from 'react-ro
 import InstallPwaModal from './components/InstallPwaModal';
 import PwaRefreshButton from './components/PwaRefreshButton';
 import PriceFilterModal from './components/PriceFilterModal';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000'
@@ -46,6 +48,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<StoreFront />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
       </Routes>
     </Router>
   );
@@ -485,8 +489,8 @@ function StoreFront() {
         <div className="max-w-7xl mx-auto pt-8 border-t border-neutral-800/50 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-neutral-500 font-medium">
           <p>© {new Date().getFullYear()} TechHive Ghana. All rights reserved.</p>
           <div className="flex items-center gap-8">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link>
             <span className="flex items-center gap-1.5">
               Made with <Sparkles size={12} className="text-yellow-500" /> in Accra
             </span>
