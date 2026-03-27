@@ -54,8 +54,20 @@ export default function InvoicePage() {
 
   const handleShareWhatsApp = () => {
     if (!request) return;
+    
+    // Format phone number: remove non-digits, and ensure it starts with 233
+    let cleanPhone = request.phone.replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) {
+      cleanPhone = '233' + cleanPhone.substring(1);
+    } else if (!cleanPhone.startsWith('233')) {
+      cleanPhone = '233' + cleanPhone;
+    }
+
     const message = `*Receipt from TechHive Ghana* 🚀\n\nHello ${request.name},\nYour order has been confirmed! Here is your digital receipt:\n\n*Receipt #:* ${request.receipt_number || 'N/A'}\n*Total:* GHS ${request.total.toLocaleString()}\n\nView full details here: ${window.location.href}\n\n*Simple | Smart | Secure*`;
-    window.open(`https://wa.me/${request.phone.replace(/\s+/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+    
+    // Using api.whatsapp.com for better reliability across platforms
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   if (loading) return (
@@ -212,9 +224,6 @@ export default function InvoicePage() {
             <p className="text-[10px] text-neutral-400 max-w-sm mx-auto leading-relaxed">
               This is a digitally generated receipt. If you have any questions regarding this transaction, please contact us within 72 hours.
             </p>
-            <div className="mt-8 flex items-center justify-center gap-1 text-[10px] text-neutral-300 font-bold uppercase tracking-[0.3em]">
-              SIMPLE | SMART | SECURE
-            </div>
           </div>
         </div>
       </div>
